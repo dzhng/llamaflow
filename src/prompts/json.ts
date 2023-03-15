@@ -3,11 +3,14 @@ import { get } from 'lodash';
 import { ZodArray } from 'zod';
 import type { JSONPrompt, RawPrompt } from '~/types';
 import { extractJSONArrayResponse, extractJSONObjectResponse } from './extracter';
+import { PromptInternal } from './index';
 
-export default function buildRawPrompt<T>(prompt: JSONPrompt<T>): RawPrompt {
+export default function buildRawPrompt<T>(
+  prompt: JSONPrompt<T> & PromptInternal<'json'>,
+): RawPrompt {
   return {
     message: `${prompt.initialMessage} ${prompt.formatMessage}`,
-    validate: async response => {
+    parse: async response => {
       const isArray = prompt.schema instanceof ZodArray;
       try {
         let json: any;
@@ -54,5 +57,5 @@ export default function buildRawPrompt<T>(prompt: JSONPrompt<T>): RawPrompt {
         };
       }
     },
-  } as RawPrompt;
+  } as RawPrompt<T>;
 }

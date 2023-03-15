@@ -56,7 +56,7 @@ A prompt is a message to an AI persona with an expectation of a specific respons
 
 ```typescript
 import { prompt } from 'llama-flow';
-import { z } from 'zod'; // JSONPrompt uses Zod for schema validation.
+import { z } from 'zod'; // JSON prompt uses Zod for schema validation.
 
 const bulletPrompt = prompt.json({
   initialMessage: 'Please rewrite this in a list of bullet points.',

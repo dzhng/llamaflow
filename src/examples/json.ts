@@ -1,5 +1,15 @@
 import { z } from 'zod'; // JSONPrompt uses Zod for schema validation.
-import { prompt } from '~/index';
+import { OpenAI, prompt } from '~/index';
+
+const llamaFlow = new OpenAI(
+  {
+    apiKey: 'YOUR_OPENAI_KEY',
+  },
+  {
+    maxTokens: 2048,
+    temperature: 0.7,
+  },
+);
 
 const bulletPrompt = prompt.json({
   initialMessage: 'Please rewrite this in a list of bullet points.',

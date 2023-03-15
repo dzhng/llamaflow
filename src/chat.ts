@@ -1,7 +1,7 @@
 import { Model } from '~/models/interface';
 
 import { buildMessage } from './persona';
-import { buildInitialMessage } from './prompts';
+import { coerceToRawPrompt } from './prompts';
 import type {
   ChatConfig,
   ChatRequestOptions,
@@ -17,16 +17,10 @@ export class Chat {
   model: Model;
   messages: Message[];
 
-  // stores the last response in this chat
-  response: ChatResponse | undefined;
-  allResponses: ChatResponse[];
-
   constructor(persona: Persona, config: ChatConfig, model: Model) {
     this.persona = persona;
     this.config = config;
     this.model = model;
-    this.response = undefined;
-    this.allResponses = [];
 
     // build system message
     this.messages = [
@@ -37,32 +31,63 @@ export class Chat {
     ];
   }
 
-  async request(prompt: Prompt, opt?: ChatRequestOptions): Promise<Chat> {
-    const coercedPrompt = typeof prompt === 'string' ? { message: prompt } : prompt;
+  async request<T>(prompt: Prompt<T>, opt?: ChatRequestOptions): Promise<ChatResponse<T>> {
+    const coercedPrompt = coerceToRawPrompt(prompt);
     const newMessages: Message[] = [
-      ...this.messages,
+      ...(opt?.messages ? opt.messages : this.messages),
       {
         role: 'user',
-        content: buildInitialMessage(coercedPrompt),
+        content: coercedPrompt.message,
+      },
+    ];
+    const response = await this.model.request(newMessages, this.persona.config, opt);
+    if (!response) {
+      throw new Error('Chat request failed');
+    }
+
+    const messagesWithResponse: Message[] = [
+      ...newMessages,
+      {
+        role: 'assistant',
+        content: response.content,
       },
     ];
 
-    const res = await this.model.request(newMessages, this.persona.config, opt);
-
     // validate res content, and recursively loop if invalid
+    if (coercedPrompt.parse) {
+      const res = await coercedPrompt.parse(response);
+      if (res.success) {
+        if (this.config.retainMemory) {
+          this.messages = messagesWithResponse;
+        }
 
-    if (this.config.retainMemory) {
-      this.messages = [
-        ...newMessages,
-        {
-          role: 'assistant',
-          content: res.content,
-        },
-      ];
+        return {
+          ...response,
+          content: res.data,
+        };
+      } else {
+        // iterate recursively until retries are up
+        if (opt?.retries && opt.retries > 0 && res.retryPrompt) {
+          return this.request(
+            {
+              ...coercedPrompt,
+              message: res.retryPrompt,
+            },
+            {
+              messages: messagesWithResponse,
+              retries: opt.retries - 1,
+            },
+          );
+        } else {
+          throw new Error('Response parsing failed');
+        }
+      }
     }
 
-    this.response = res;
-    this.allResponses.push(res);
-    return this;
+    if (this.config.retainMemory) {
+      this.messages = messagesWithResponse;
+    }
+
+    return response as ChatResponse<string>;
   }
 }

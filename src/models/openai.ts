@@ -49,7 +49,7 @@ export class OpenAI implements Model {
       timeout = CompletionDefaultTimeout,
       ...opt
     }: ChatRequestOptions,
-  ): Promise<ChatResponse> {
+  ): Promise<ChatResponse<string>> {
     try {
       const completion = await this.openai.createChatCompletion(
         {
@@ -80,7 +80,15 @@ export class OpenAI implements Model {
         throw new Error('Completion response malformed');
       }
 
-      return { content, usage, model: completion.data.model };
+      return {
+        content,
+        model: completion.data.model,
+        usage: {
+          totalTokens: usage.total_tokens,
+          promptTokens: usage.prompt_tokens,
+          completionTokens: usage.completion_tokens,
+        },
+      };
     } catch (error: unknown) {
       if (!isAxiosError(error)) {
         throw error;

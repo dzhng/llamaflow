@@ -32,15 +32,18 @@ export type ChatRequestOptions = {
   retries?: number;
   retryInterval?: number;
   timeout?: number;
+
+  // override the messages used for completion, only use this if you understand the API well
+  messages?: Message[];
 };
 
-export interface ChatResponse {
-  content: string;
+export interface ChatResponse<T = string> {
+  content: T;
   model: string;
   usage: {
-    prompt_tokens: number;
-    completion_tokens: number;
-    total_tokens: number;
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
   };
 }
 
@@ -71,9 +74,9 @@ export interface BulletPointsPrompt {
 
 export interface RawPrompt<T = any> {
   message: string;
-  validate?: (
-    response: ChatResponse,
+  parse?: (
+    response: ChatResponse<string>,
   ) => Promise<{ success: false; retryPrompt?: string } | { success: true; data: T }>;
 }
 
-export type Prompt = string | RawPrompt | JSONPrompt;
+export type Prompt<T = string> = string | RawPrompt<T> | JSONPrompt<T>;

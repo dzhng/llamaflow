@@ -5,5 +5,5 @@ export interface Model {
     messages: Message[],
     config?: Partial<ModelConfig>,
     opt?: ChatRequestOptions,
-  ): Promise<ChatResponse>;
+  ): Promise<ChatResponse<string>>;
 }
