@@ -1,9 +1,8 @@
 import { isAxiosError } from 'axios';
 import { defaults } from 'lodash';
 import { Configuration, OpenAIApi } from 'openai';
-import { Chat } from '~/chat';
-import { debug } from '~/utils';
 
+import { Chat } from '~/chat';
 import {
   CompletionDefaultRetries,
   CompletionDefaultTimeout,
@@ -18,7 +17,7 @@ import type {
   OpenAIConfig,
   Persona,
 } from '~/types';
-import { sleep } from '~/utils';
+import { debug, sleep } from '~/utils';
 
 import type { Model } from './interface';
 

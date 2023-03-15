@@ -1,4 +1,5 @@
 import { Model } from '~/models/interface';
+
 import { buildMessage } from './persona';
 import { buildInitialMessage } from './prompts';
 import type {
@@ -16,10 +17,16 @@ export class Chat {
   model: Model;
   messages: Message[];
 
+  // stores the last response in this chat
+  response: ChatResponse | undefined;
+  allResponses: ChatResponse[];
+
   constructor(persona: Persona, config: ChatConfig, model: Model) {
     this.persona = persona;
     this.config = config;
     this.model = model;
+    this.response = undefined;
+    this.allResponses = [];
 
     // build system message
     this.messages = [
@@ -30,7 +37,7 @@ export class Chat {
     ];
   }
 
-  async request(prompt: string | Prompt, opt?: ChatRequestOptions): Promise<ChatResponse> {
+  async request(prompt: Prompt, opt?: ChatRequestOptions): Promise<Chat> {
     const coercedPrompt = typeof prompt === 'string' ? { message: prompt } : prompt;
     const newMessages: Message[] = [
       ...this.messages,
@@ -53,6 +60,9 @@ export class Chat {
         },
       ];
     }
-    return res;
+
+    this.response = res;
+    this.allResponses.push(res);
+    return this;
   }
 }

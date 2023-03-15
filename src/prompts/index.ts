@@ -1,9 +1,8 @@
-import { Prompt } from './types';
+import { z } from 'zod';
+import type { JSONPrompt, RawPrompt } from '~/types';
+import buildBulletPointsPrompt from './bulletPoints';
+import buildJSONPrompt from './json';
 
-export function buildInitialMessage(prompt: Prompt) {
-  if (!prompt.formatMessage) {
-    return prompt.message;
-  }
-
-  return `${prompt.message.trim()} ${prompt.formatMessage}`;
-}
+export const raw = (p: RawPrompt) => p;
+export const json = (p: JSONPrompt) => buildJSONPrompt<z.infer<typeof p.schema>>(p);
+export const bulletPoints = buildBulletPointsPrompt;

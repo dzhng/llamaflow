@@ -27,15 +27,6 @@ export interface Persona {
   config?: Partial<ChatConfig> & Partial<ModelConfig>;
 }
 
-export interface Prompt<T = any> {
-  message: string;
-  formatMessage?: string;
-  parseResponse?: (res: string) => T;
-  schema?: z.ZodType<T>;
-  retries?: number;
-  validate?: (response: Response) => Promise<{ success: boolean; retryPrompt?: string }>;
-}
-
 export type ChatRequestOptions = {
   // the number of time to retry this request due to rate limit or retriable API errors
   retries?: number;
@@ -57,3 +48,32 @@ export interface Message {
   role: 'user' | 'assistant' | 'system';
   content: string;
 }
+
+// Prompt types
+
+export interface PromptOptions {
+  // number of times to retry the validation by asking the LLM again
+  retries?: number;
+}
+
+export interface JSONPrompt<T = any> {
+  initialMessage: string;
+  formatMessage?: string;
+  parseResponse?: (res: string) => T;
+  schema: z.ZodType<T>;
+}
+
+export interface BulletPointsPrompt {
+  message: string;
+  amount?: number;
+  length?: number;
+}
+
+export interface RawPrompt<T = any> {
+  message: string;
+  validate?: (
+    response: ChatResponse,
+  ) => Promise<{ success: false; retryPrompt?: string } | { success: true; data: T }>;
+}
+
+export type Prompt = string | RawPrompt | JSONPrompt;
