@@ -54,22 +54,19 @@ export interface Message {
 
 // Prompt types
 
-export interface PromptOptions {
-  // number of times to retry the validation by asking the LLM again
-  retries?: number;
-}
-
 export interface JSONPrompt<T = any> {
   initialMessage: string;
   formatMessage?: string;
   parseResponse?: (res: string) => T;
   schema: z.ZodType<T>;
+  promptRetries?: number;
 }
 
 export interface BulletPointsPrompt {
   message: string;
   amount?: number;
   length?: number;
+  promptRetries?: number;
 }
 
 export interface RawPrompt<T = any> {
@@ -77,6 +74,7 @@ export interface RawPrompt<T = any> {
   parse?: (
     response: ChatResponse<string>,
   ) => Promise<{ success: false; retryPrompt?: string } | { success: true; data: T }>;
+  promptRetries?: number;
 }
 
 export type Prompt<T = string> = string | RawPrompt<T> | JSONPrompt<T>;

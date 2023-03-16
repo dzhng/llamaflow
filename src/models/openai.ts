@@ -31,13 +31,8 @@ export class OpenAI implements Model {
     this.defaults = defaults;
   }
 
-  Chat() {
-    const model: Model = this;
-    return class extends Chat {
-      constructor(persona: Persona, config: ChatConfig) {
-        super(persona, config, model);
-      }
-    };
+  chat(persona: Persona, config?: ChatConfig) {
+    return new Chat(persona, config ?? {}, this);
   }
 
   async request(

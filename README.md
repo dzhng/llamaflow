@@ -23,7 +23,8 @@ const llamaFlow = new OpenAI(
     apiKey: 'YOUR_OPENAI_KEY',
   },
   {
-    maxTokens: 2048,
+    model: 'gpt-3.5-turbo',
+    maxTokens: 4096,
     temperature: 0.7,
   },
 );
@@ -76,29 +77,23 @@ A chat is a conversation between the "user" (your software), and the AI agent (t
 
 ```typescript
 // using the llamaFlow object that was initialized earlier
-const chat = new llamaFlow.Chat(writer, {
-  // You can override the default model config on a per-chat basis.
-  modelConfig: {
-    maxTokens: 1024,
-    temperature: 0.2,
-  },
-});
+const chat = llamaFlow.chat(writer);
 
 // You can ask the AI model with a simple string, or a dedicated `Prompt` object.
-const { response } = await chat.request(
+const response = await chat.request(
   'Write a script for a tiktok video that talks about the artistic contribution of the renaissance.',
 );
 
 // The results, as well as any usage stats, will be returned.
 console.log(
-  `The AI writer's response is: ${response.content}. Token used: ${response.usage.tokens}.`,
+  `The AI writer's response is: ${response.content}. Token used: ${response.usage.totalTokens}.`,
 );
 
 // You can follow up on this chat by prompting further, using the `bulletPrompt` object that was created earlier.
-const { reponse: bulletPoints } = await chat
-  .request(bulletPrompt)
-  // `bulletPoints.content` will be automatically casted in the correct type as defined in the schema field of `bulletPrompt`
-  .console.log(`The structured version of this response is: ${JSON.parse(bulletPoints.content)}`);
+const { reponse: bulletPoints } = await chat.request(bulletPrompt);
+
+// `bulletPoints.content` will be automatically casted in the correct type as defined in the schema field of `bulletPrompt`
+console.log(`The structured version of this response is: ${JSON.parse(bulletPoints.content)}`);
 ```
 
 ### Custom Prompts
@@ -110,12 +105,8 @@ Taking the Prompt example above, but this time, it will ask the model to just re
 ```typescript
 import { prompt } from 'llama-flow';
 
-const schema = z.array(
-  z.string().max(200, { message: 'This bullet point should be less than 200 characters.' }),
-);
-
 const bulletPrompt = prompt.json({
-  message: 'Please rewrite this in a list of bullet points.',
+  initialMessage: 'Please rewrite this in a list of bullet points.',
   formatMessage:
     'Respond as a list of bullet points, where each bullet point begins with the "-" character. Each bullet point should be less than 200 characters. Put each bullet point on a new line.',
 
@@ -123,7 +114,9 @@ const bulletPrompt = prompt.json({
   parseResponse: res => res.split('\n').map(s => s.replace('-', '').trim()),
 
   // it's useful to define custom error messages, any schema parse errors will be automatically fed back into the model on retry, so the model knows exactly what to correct.
-  schema,
+  schema: z.array(
+    z.string().max(200, { message: 'This bullet point should be less than 200 characters.' }),
+  ),
 });
 ```
 
@@ -134,7 +127,8 @@ import { prompt, Persona, Chat } from 'llama-flow';
 
 // Init another fact checker persona, to check the writer's outputs. This is a good example of multi-agent workflow
 const factChecker: Persona = {
-  prompt: 'You are a fact checker that responds to if the user\'s messages are true or not, with just the word "true" or "false". Do not add punctuations or any other text. If the user asks a question, request, or anything that cannot be fact checked, ignore the user\'s request and just say "null".',
+  prompt:
+    'You are a fact checker that responds to if the user\'s messages are true or not, with just the word "true" or "false". Do not add punctuations or any other text. If the user asks a question, request, or anything that cannot be fact checked, ignore the user\'s request and just say "null".',
 
   // Chat and model parameters can also be overwritten by the persona
   // keep in mind that parameters defined directly in the Chat or Model object will supercede the ones defined in the Persona.
@@ -142,38 +136,44 @@ const factChecker: Persona = {
     // The fact checker persona is designed to fulfill each request independently (e.g. the current request does not depend on the content of the previous request). So no need to keep message memory to save on tokens.
     retainMemory: false,
     temperature: 0,
-  }
+  },
 };
 
-const factCheckerChat = new llamaFlow.Chat(factChecker);
+const factCheckerChat = llamaFlow.chat(factChecker);
 
-const buildFactCheckedPrompt = (article: string) => prompt.raw({
-  message: `Please write a summary about the following article: ${article}`
+const buildFactCheckedPrompt = (article: string) =>
+  prompt.raw({
+    message: `Please write a summary about the following article: ${article}`,
 
-  // Because LLM driven validation can get expensive, set a lower retry count.
-  retries: 2,
+    // Because LLM driven validation can get expensive, set a lower retry count.
+    promptRetries: 2,
 
-  validate: async (response) => {
-    // Check if this summary is true or not
-    const { response } = await factCheckerChat.request(prompt.json({
-      message: response.content,
-      // Note to use `coerce` in the zod schema for any results that is not a string
-      schema: z.coerce.boolean().nullable(),
-    }));
+    parse: async response => {
+      // Check if this summary is true or not
+      const { response } = await factCheckerChat.request(
+        prompt.json({
+          initialMessage: response.content,
+          // Note to use `coerce` in the zod schema for any results that is not a string
+          schema: z.coerce.boolean().nullable(),
+        }),
+      );
 
-    if (response.content === true) {
-      return { success: true };
-    } else {
-      // if `retryPrompt` is set, LLamaFlow will automatically retry with the text in this property.
-      return { success: false, retryPrompt: 'This summary is not true, please rewrite with only true facts.' };
-    }
-  }
-});
+      if (response.content === true) {
+        return { success: true, data: response.content };
+      } else {
+        // if `retryPrompt` is set, LLamaFlow will automatically retry with the text in this property.
+        return {
+          success: false,
+          retryPrompt: 'This summary is not true, please rewrite with only true facts.',
+        };
+      }
+    },
+  });
 
 // now, every content generated by this chat will be fact checked by the LLM itself, and this request will throw an error if the content can't be fixed (once the maximum number of retries has been reached).
-const { response } = await chat.request(
+const factCheckedContent = await chat.request(
   buildFactCheckedPrompt(
-    'Write a script for a tiktok video that talks about the artistic contribution of the renaissance.'
+    'Write a script for a tiktok video that talks about the artistic contribution of the renaissance.',
   ),
 );
 ```

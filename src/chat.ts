@@ -1,4 +1,5 @@
 import { Model } from '~/models/interface';
+import { PromptDefaultRetries } from './config';
 
 import { buildMessage } from './persona';
 import { coerceToRawPrompt } from './prompts';
@@ -66,16 +67,17 @@ export class Chat {
           content: res.data,
         };
       } else {
-        // iterate recursively until retries are up
-        if (opt?.retries && opt.retries > 0 && res.retryPrompt) {
+        // iterate recursively until promptRetries are up
+        const promptRetries = coercedPrompt.promptRetries ?? PromptDefaultRetries;
+        if (promptRetries > 0 && res.retryPrompt) {
           return this.request(
             {
               ...coercedPrompt,
               message: res.retryPrompt,
+              promptRetries: promptRetries - 1,
             },
             {
               messages: messagesWithResponse,
-              retries: opt.retries - 1,
             },
           );
         } else {
