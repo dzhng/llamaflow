@@ -178,24 +178,24 @@ const factCheckedContent = await chat.request(
 );
 ```
 
-Lastly, the chat API allows chaining. This is useful when you have a multi-step query for the LLM, where the next query depends on the result of the current query. A good example is to first write the content, then extract entities, and lastly, give some options for the title.
+Because this is an API, it's often useful to keep requesting from the same chat. Often the message history will serve as context for the next request. A good example use case is a prompt to first write some content, then extract entities, and lastly, give some options for the title.
 
 ```typescript
-const {
-  responses: [article, entities, titles],
-} = await chat
-  .request('Write a blog post about the financial crisis of 2008')
-  .request(
-    prompt.json({
-      message:
-        'What are the different entities in the above blog post? Respond in a JSON array, where the items in the array are just the names of the entities.',
-      schema: z.array(z.string()),
-    }),
-  )
-  .request(
-    prompt.bulletPoints({
-      message: 'Write a good title for this post',
-      amount: 10,
-    }),
-  );
+const article = await chat.request('Write a blog post about the financial crisis of 2008');
+
+const entities = await chat.request(
+  prompt.json({
+    initialMessage: 'What are the different entities in the above blog post?',
+    formatMessage:
+      'Respond in a JSON array, where the items in the array are just the names of the entities.',
+    schema: z.array(z.string()),
+  }),
+);
+
+const titles = await chat.request(
+  prompt.bulletPoints({
+    message: 'Write a good title for this post',
+    amount: 10,
+  }),
+);
 ```

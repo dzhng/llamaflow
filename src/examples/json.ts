@@ -110,3 +110,23 @@ const factCheckedContent = await chat.request(
 );
 
 console.log(factCheckedContent);
+
+const article = await chat.request('Write a blog post about the financial crisis of 2008');
+
+const entities = await chat.request(
+  prompt.json({
+    initialMessage: 'What are the different entities in the above blog post?',
+    formatMessage:
+      'Respond in a JSON array, where the items in the array are just the names of the entities.',
+    schema: z.array(z.string()),
+  }),
+);
+
+const titles = await chat.request(
+  prompt.bulletPoints({
+    message: 'Write a good title for this post',
+    amount: 10,
+  }),
+);
+
+console.log(article, entities, titles);
