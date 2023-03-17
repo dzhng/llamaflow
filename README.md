@@ -81,7 +81,9 @@ const chat = llamaFlow.chat(writer);
 
 // You can ask the AI model with a simple string, or a dedicated `Prompt` object.
 const response = await chat.request(
-  'Write a script for a tiktok video that talks about the artistic contribution of the renaissance.',
+  prompt.text(
+    'Write a script for a tiktok video that talks about the artistic contribution of the renaissance.',
+  ),
 );
 
 // The results, as well as any usage stats, will be returned.
@@ -90,10 +92,10 @@ console.log(
 );
 
 // You can follow up on this chat by prompting further, using the `bulletPrompt` object that was created earlier.
-const { reponse: bulletPoints } = await chat.request(bulletPrompt);
+const bulletPoints = await chat.request(bulletPrompt);
 
 // `bulletPoints.content` will be automatically casted in the correct type as defined in the schema field of `bulletPrompt`
-console.log(`The structured version of this response is: ${JSON.parse(bulletPoints.content)}`);
+console.log(`The structured version of this response is: ${JSON.stringify(bulletPoints.content)}`);
 ```
 
 ### Custom Prompts
@@ -142,7 +144,7 @@ const factChecker: Persona = {
 const factCheckerChat = llamaFlow.chat(factChecker);
 
 const buildFactCheckedPrompt = (article: string) =>
-  prompt.raw({
+  prompt.text({
     message: `Please write a summary about the following article: ${article}`,
 
     // Because LLM driven validation can get expensive, set a lower retry count.
@@ -181,7 +183,9 @@ const factCheckedContent = await chat.request(
 Because this is an API, it's often useful to keep requesting from the same chat. Often the message history will serve as context for the next request. A good example use case is a prompt to first write some content, then extract entities, and lastly, give some options for the title.
 
 ```typescript
-const article = await chat.request('Write a blog post about the financial crisis of 2008');
+const article = await chat.request(
+  prompt.text('Write a blog post about the financial crisis of 2008'),
+);
 
 const entities = await chat.request(
   prompt.json({
