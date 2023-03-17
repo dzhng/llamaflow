@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "esnext",
-    "moduleResolution": "nodenext",
+    "moduleResolution": "node",
     "lib": ["dom", "esnext"],
     "allowJs": true,
     "alwaysStrict": true,

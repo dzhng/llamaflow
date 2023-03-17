@@ -5,7 +5,7 @@ export interface OpenAIConfig {
 }
 
 export interface ModelConfig {
-  model: string;
+  model?: string;
   maxTokens?: number;
   temperature?: number;
   topP?: number;

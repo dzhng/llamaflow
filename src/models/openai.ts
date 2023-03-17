@@ -1,6 +1,6 @@
 import { isAxiosError } from 'axios';
 import { defaults } from 'lodash';
-import { Configuration, OpenAIApi } from 'openai';
+import { Configuration, CreateChatCompletionRequest, OpenAIApi } from 'openai';
 
 import { Chat } from 'chat';
 import {
@@ -20,6 +20,21 @@ import type {
 import { debug, sleep } from 'utils';
 
 import type { Model } from './interface';
+
+const DefaultModel = 'gpt-3.5-turbo';
+
+const convertConfig = (config: Partial<ModelConfig>): CreateChatCompletionRequest => ({
+  messages: [],
+  model: config.model ?? DefaultModel,
+  temperature: config.temperature,
+  top_p: config.topP,
+  n: 1,
+  stop: config.stop,
+  presence_penalty: config.presencePenalty,
+  frequency_penalty: config.frequencyPenalty,
+  logit_bias: config.logitBias,
+  user: config.user,
+});
 
 export class OpenAI implements Model {
   private openai: OpenAIApi;
@@ -43,26 +58,14 @@ export class OpenAI implements Model {
       retryInterval = RateLimitRetryIntervalMs,
       timeout = CompletionDefaultTimeout,
       ...opt
-    }: ChatRequestOptions,
+    } = {} as ChatRequestOptions,
   ): Promise<ChatResponse<string>> {
+    debug.log(`Sending request with ${retries} retries`);
     try {
       const completion = await this.openai.createChatCompletion(
         {
+          ...defaults(convertConfig(config), convertConfig(this.defaults)),
           messages,
-          ...defaults(
-            {
-              model: config.model,
-              temperature: config.temperature,
-              top_p: config.topP,
-              n: 1,
-              stop: config.stop,
-              presence_penalty: config.presencePenalty,
-              frequency_penalty: config.frequencyPenalty,
-              logit_bias: config.logitBias,
-              user: config.user,
-            },
-            this.defaults,
-          ),
         },
         {
           timeout,
@@ -97,9 +100,10 @@ export class OpenAI implements Model {
 
       if (
         error.code === 'ETIMEDOUT' ||
+        error.code === 'ECONNABORTED' ||
         (error.response && (error.response.status === 429 || error.response.status >= 500))
       ) {
-        debug.log('Completion rate limited, retrying...');
+        debug.log(`Completion rate limited, retrying... attempts left: ${retries}`);
         await sleep(retryInterval);
         return this.request(messages, config, {
           ...opt,
@@ -107,6 +111,10 @@ export class OpenAI implements Model {
           // double the interval everytime we retry
           retryInterval: retryInterval * 2,
         });
+      }
+
+      if (error?.response?.status === 401) {
+        debug.error('Authorization error, did you set the OpenAI API key correctly?');
       }
 
       throw error;

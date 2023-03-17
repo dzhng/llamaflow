@@ -2,8 +2,8 @@ import { debug as mDebug } from 'debug';
 
 import type { RawPrompt } from './types';
 
-const error = mDebug('llama-flow:error');
-const log = mDebug('llama-flow:log');
+const error = mDebug('llamaflow:error');
+const log = mDebug('llamaflow:log');
 // eslint-disable-next-line no-console
 log.log = console.log.bind(console);
 

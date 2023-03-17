@@ -18,16 +18,7 @@ Specifically, this package adds the following capabilities on top of the standar
 ```typescript
 import { OpenAI } from 'llama-flow';
 
-const llamaFlow = new OpenAI(
-  {
-    apiKey: 'YOUR_OPENAI_KEY',
-  },
-  {
-    model: 'gpt-3.5-turbo',
-    maxTokens: 4096,
-    temperature: 0.7,
-  },
-);
+const llamaFlow = new OpenAI({ apiKey: 'YOUR_OPENAI_KEY' }, { temperature: 0.7 });
 ```
 
 ### Personas
@@ -201,3 +192,14 @@ const titles = await chat.request(
   }),
 );
 ```
+
+### Debugging
+
+LLamaFlow usese the `debug` module for logging & error messages. To run in debug mode, set the `DEBUG` env variable:
+
+`DEBUG=llamaflow:* yarn playground`
+
+You can also specify errors or logs only:
+
+`DEBUG=llamaflow:error yarn playground`
+`DEBUG=llamaflow:log yarn playground`

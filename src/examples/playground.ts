@@ -1,19 +1,11 @@
 import { z } from 'zod';
 
-import { OpenAI } from 'models/openai';
-import * as prompt from 'prompts';
-import { Persona } from 'types';
+import { OpenAI, Persona, prompt } from 'index';
 
 async function go() {
   const llamaFlow = new OpenAI(
-    {
-      apiKey: process.env.OPENAI_KEY ?? 'YOUR_OPENAI_KEY',
-    },
-    {
-      model: 'gpt-3.5-turbo',
-      maxTokens: 4096,
-      temperature: 0.7,
-    },
+    { apiKey: process.env.OPENAI_KEY ?? 'YOUR_OPENAI_KEY' },
+    { temperature: 0.7, maxTokens: 2048 },
   );
 
   const writer: Persona = {
