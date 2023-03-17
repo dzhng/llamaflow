@@ -2,7 +2,7 @@
   "name": "llama-flow",
   "packageManager": "yarn@3.4.1",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --build --pretty",
     "lint": "eslint src --ext ts,tsx,js,jsx --ignore-path .gitignore --fix"
   },
   "dependencies": {
