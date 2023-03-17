@@ -2,15 +2,22 @@ import { Model } from '~/models/interface';
 import { PromptDefaultRetries } from './config';
 
 import { buildMessage } from './persona';
-import { coerceToRawPrompt } from './prompts';
 import type {
   ChatConfig,
   ChatRequestOptions,
   ChatResponse,
   Message,
   Persona,
-  Prompt,
+  RawPrompt,
 } from './types';
+import { GetRawPromptReturnType } from './utils';
+
+const prompt: RawPrompt<object> = {
+  message: 'hello',
+  parse: async () => ({ success: true, data: {} }),
+};
+
+type pt = GetRawPromptReturnType<typeof prompt>;
 
 export class Chat {
   persona: Persona;
@@ -32,8 +39,10 @@ export class Chat {
     ];
   }
 
-  async request<T>(prompt: Prompt<T>, opt?: ChatRequestOptions): Promise<ChatResponse<T>> {
-    const coercedPrompt = coerceToRawPrompt(prompt);
+  async request(prompt: string | RawPrompt, opt?: ChatRequestOptions): Promise<ChatResponse<any>> {
+    const coercedPrompt =
+      typeof prompt === 'string' ? ({ message: prompt } as RawPrompt<string>) : prompt;
+
     const newMessages: Message[] = [
       ...(opt?.messages ? opt.messages : this.messages),
       {
@@ -90,6 +99,6 @@ export class Chat {
       this.messages = messagesWithResponse;
     }
 
-    return response as ChatResponse<string>;
+    return response;
   }
 }

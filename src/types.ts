@@ -76,5 +76,3 @@ export interface RawPrompt<T = any> {
   ) => Promise<{ success: false; retryPrompt?: string } | { success: true; data: T }>;
   promptRetries?: number;
 }
-
-export type Prompt<T = string> = string | RawPrompt<T> | JSONPrompt<T>;
