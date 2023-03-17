@@ -1,5 +1,7 @@
 import { z } from 'zod';
+
 import { BulletPointsPrompt, RawPrompt } from '~/types';
+
 import buildJSONPrompt from './json';
 
 export default function buildRawPrompt(prompt: BulletPointsPrompt): RawPrompt<string[]> {

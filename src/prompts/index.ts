@@ -1,5 +1,7 @@
 import { z } from 'zod';
+
 import type { BulletPointsPrompt, JSONPrompt, RawPrompt } from '~/types';
+
 import buildBulletPointsPrompt from './bulletPoints';
 import buildJSONPrompt from './json';
 

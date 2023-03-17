@@ -1,4 +1,5 @@
 import { z } from 'zod';
+
 import { OpenAI, Persona, prompt } from '~/index';
 
 const llamaFlow = new OpenAI(
@@ -41,14 +42,14 @@ const response = await chat.request(
 );
 
 // The results, as well as any usage stats, will be returned.
-console.log(
+console.info(
   `The AI writer's response is: ${response.content}. Token used: ${response.usage.totalTokens}.`,
 );
 
 const bulletPoints = await chat.request(bulletPrompt);
 
 // `bulletPoints.content` will be automatically casted in the correct type as defined in the schema field of `bulletPrompt`
-console.log(`The structured version of this response is: ${JSON.stringify(bulletPoints.content)}`);
+console.info(`The structured version of this response is: ${JSON.stringify(bulletPoints.content)}`);
 
 const bulletPrompt2 = prompt.json({
   initialMessage: 'Please rewrite this in a list of bullet points.',
@@ -64,7 +65,7 @@ const bulletPrompt2 = prompt.json({
   ),
 });
 
-console.log(bulletPrompt2);
+console.info(bulletPrompt2);
 
 const factChecker: Persona = {
   prompt:
@@ -111,7 +112,7 @@ const factCheckedContent = await chat.request(
   ),
 );
 
-console.log(factCheckedContent);
+console.info(factCheckedContent);
 
 const article = await chat.request(
   prompt.text('Write a blog post about the financial crisis of 2008'),
@@ -133,4 +134,4 @@ const titles = await chat.request(
   }),
 );
 
-console.log(article, entities, titles);
+console.info(article, entities, titles);

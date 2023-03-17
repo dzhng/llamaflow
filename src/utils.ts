@@ -1,4 +1,5 @@
 import { debug as mDebug } from 'debug';
+
 import type { RawPrompt } from './types';
 
 const error = mDebug('llama-flow:error');
