@@ -1,3 +1,5 @@
+import debug from 'debug';
+
 import { Model } from 'models/interface';
 
 import { PromptDefaultRetries } from './config';
@@ -32,6 +34,7 @@ export class Chat {
   }
 
   async request<T>(prompt: RawPrompt<T>, opt?: ChatRequestOptions): Promise<ChatResponse<T>> {
+    debug.log('⬆️ sending request:', prompt.message);
     const newMessages: Message[] = [
       ...(opt?.messages ? opt.messages : this.messages),
       {
@@ -44,6 +47,7 @@ export class Chat {
       throw new Error('Chat request failed');
     }
 
+    debug.log('⬇️ received response:', response.content);
     const messagesWithResponse: Message[] = [
       ...newMessages,
       {
@@ -68,15 +72,17 @@ export class Chat {
         // iterate recursively until promptRetries are up
         const promptRetries = prompt.promptRetries ?? PromptDefaultRetries;
         if (promptRetries > 0 && res.retryPrompt) {
+          debug.log(
+            `⚠️ retrying request with prompt: ${res.retryPrompt}... current message stack:`,
+            messagesWithResponse,
+          );
           return this.request(
             {
               ...prompt,
               message: res.retryPrompt,
               promptRetries: promptRetries - 1,
             },
-            {
-              messages: messagesWithResponse,
-            },
+            { messages: messagesWithResponse },
           );
         } else {
           throw new Error('Response parsing failed');

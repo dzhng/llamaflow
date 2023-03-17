@@ -67,9 +67,7 @@ export class OpenAI implements Model {
           ...defaults(convertConfig(config), convertConfig(this.defaults)),
           messages,
         },
-        {
-          timeout,
-        },
+        { timeout },
       );
 
       const content = completion.data.choices[0].message?.content;
