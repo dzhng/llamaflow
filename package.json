@@ -1,10 +1,40 @@
 {
   "name": "llama-flow",
+  "description": "A set of utilities to better work with chat based LLMs for Typescript.",
   "packageManager": "yarn@3.4.1",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "example",
+    "typescript",
+    "npm",
+    "package",
+    "sample",
+    "boilerplate",
+    "starter",
+    "demo",
+    "cjs",
+    "esm",
+    "umd"
+  ],
+  "author": "David Zhang <david@aomni.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/dzhng/llamaflow",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:dzhng/llamaflow.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dzhng/llamaflow/issues"
+  },
   "scripts": {
-    "prepare": "husky install",
+    "postinstall": "husky install",
     "build": "tsc --build --pretty",
     "lint": "eslint src --ext ts,tsx,js,jsx --ignore-path .gitignore --fix",
     "test": "jest --passWithNoTests"
