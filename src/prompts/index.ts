@@ -13,6 +13,3 @@ export const json = <T extends z.ZodType>(p: JSONPrompt<T>): RawPrompt<z.infer<T
 
 export const bulletPoints = (p: BulletPointsPrompt): RawPrompt<string[]> =>
   buildBulletPointsPrompt(p);
-
-const test = <T extends z.ZodType>(t: T): z.infer<T> => t.parse({ a: 'b' });
-const t = test(z.object({}));
