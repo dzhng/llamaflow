@@ -9,7 +9,6 @@ import type {
   Persona,
   RawPrompt,
 } from './types';
-import { PromptReturnType } from './utils';
 
 export class Chat {
   persona: Persona;
@@ -31,10 +30,7 @@ export class Chat {
     ];
   }
 
-  async request<T extends RawPrompt<any>>(
-    prompt: T,
-    opt?: ChatRequestOptions,
-  ): Promise<ChatResponse<PromptReturnType<T>>> {
+  async request<T>(prompt: RawPrompt<T>, opt?: ChatRequestOptions): Promise<ChatResponse<T>> {
     const newMessages: Message[] = [
       ...(opt?.messages ? opt.messages : this.messages),
       {
@@ -91,6 +87,9 @@ export class Chat {
       this.messages = messagesWithResponse;
     }
 
+    // NOTE: there's an error here:
+    // Type 'ChatResponse<string>' is not assignable to type 'ChatResponse<T>'
+    // Will cast to any for now
     return response as any;
   }
 }

@@ -48,7 +48,7 @@ console.log(
 const bulletPoints = await chat.request(bulletPrompt);
 
 // `bulletPoints.content` will be automatically casted in the correct type as defined in the schema field of `bulletPrompt`
-console.log(`The structured version of this response is: ${JSON.parse(bulletPoints.content)}`);
+console.log(`The structured version of this response is: ${JSON.stringify(bulletPoints.content)}`);
 
 const bulletPrompt2 = prompt.json({
   initialMessage: 'Please rewrite this in a list of bullet points.',

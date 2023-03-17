@@ -8,7 +8,8 @@ export type PromptKind = 'json' | 'bullet-points';
 export const text = (p: string | RawPrompt<string>): RawPrompt<string> =>
   typeof p === 'string' ? { message: p } : p;
 
-export const json = <T extends z.ZodType>(p: JSONPrompt<T>): z.infer<T> => buildJSONPrompt(p);
+export const json = <T extends z.ZodType>(p: JSONPrompt<T>): RawPrompt<z.infer<T>> =>
+  buildJSONPrompt(p);
 
 export const bulletPoints = (p: BulletPointsPrompt): RawPrompt<string[]> =>
   buildBulletPointsPrompt(p);
