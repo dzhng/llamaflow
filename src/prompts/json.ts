@@ -49,6 +49,7 @@ export default function buildRawPrompt<T extends z.ZodType>(
             retryPrompt: ((prompt.formatMessage ?? '') + '\n' + issuesMessage).trim(),
           };
         }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (e) {
         return {
           success: false,
