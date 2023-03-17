@@ -153,10 +153,8 @@ const buildFactCheckedPrompt = (article: string) =>
     parse: async response => {
       // Check if this summary is true or not
       const { response } = await factCheckerChat.request(
-        prompt.json({
-          initialMessage: response.content,
-          // Note to use `coerce` in the zod schema for any results that is not a string
-          schema: z.coerce.boolean().nullable(),
+        prompt.boolean({
+          message: response.content,
         }),
       );
 

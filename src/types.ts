@@ -69,6 +69,11 @@ export interface BulletPointsPrompt {
   promptRetries?: number;
 }
 
+export interface BooleanPrompt {
+  message: string;
+  promptRetries?: number;
+}
+
 export interface RawPrompt<T = string> {
   message: string;
   parse?: (
