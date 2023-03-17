@@ -1,6 +1,6 @@
 # LLamaFlow
 
-A set of utilities to better work with chat based LLMs (e.g. ChatGPT from OpenAI), for Typescript and Javascript.
+A set of utilities to better work with chat based LLMs (e.g. ChatGPT from OpenAI) for Typescript.
 
 LLamaFlow is meant to be the middleware layer that sits between your software and the AI model. The pattern for generating correct outputs from LLMs is converging on _ask and validate_, where after the initial generation, there is a back-and-forth with the model itself to correct the output according to spec. LLamaFlow abstracts away this entire process, and exposes a simple request & response API for the model where all responses are validated.
 
@@ -76,7 +76,7 @@ Bringing the concepts together.
 A chat is a conversation between the "user" (your software), and the AI agent (the Persona defined). LLamaFlow will take care of managing chat memory, including pruning the memory as needed in order to fit the context window. Note that different memory management strategies will be added in the future.
 
 ```typescript
-// using the llamaFlow object that was initialized earlier
+// using the llamaFlow object and the writer persona that was initialized earlier
 const chat = llamaFlow.chat(writer);
 
 // You can ask the AI model with a simple string, or a dedicated `Prompt` object.

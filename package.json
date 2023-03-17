@@ -12,17 +12,15 @@
     "dist"
   ],
   "keywords": [
-    "example",
     "typescript",
-    "npm",
-    "package",
-    "sample",
-    "boilerplate",
-    "starter",
-    "demo",
-    "cjs",
-    "esm",
-    "umd"
+    "chatgpt",
+    "llama",
+    "llm",
+    "ai",
+    "ml",
+    "prompt",
+    "prompt engineering",
+    "openai"
   ],
   "author": "David Zhang <david@aomni.com>",
   "license": "MIT",

@@ -4,7 +4,7 @@ import { OpenAI, Persona, prompt } from '~/index';
 
 const llamaFlow = new OpenAI(
   {
-    apiKey: 'YOUR_OPENAI_KEY',
+    apiKey: process.env.OPENAI_KEY ?? 'YOUR_OPENAI_KEY',
   },
   {
     model: 'gpt-3.5-turbo',
@@ -51,7 +51,7 @@ const bulletPoints = await chat.request(bulletPrompt);
 // `bulletPoints.content` will be automatically casted in the correct type as defined in the schema field of `bulletPrompt`
 console.info(`The structured version of this response is: ${JSON.stringify(bulletPoints.content)}`);
 
-const bulletPrompt2 = prompt.json({
+const parsedBulletPrompt = prompt.json({
   initialMessage: 'Please rewrite this in a list of bullet points.',
   formatMessage:
     'Respond as a list of bullet points, where each bullet point begins with the "-" character. Each bullet point should be less than 200 characters. Put each bullet point on a new line.',
@@ -65,7 +65,10 @@ const bulletPrompt2 = prompt.json({
   ),
 });
 
-console.info(bulletPrompt2);
+console.info(
+  'The parsed bullet prompt that automatically validates the return format is:',
+  parsedBulletPrompt,
+);
 
 const factChecker: Persona = {
   prompt:
@@ -112,7 +115,7 @@ const factCheckedContent = await chat.request(
   ),
 );
 
-console.info(factCheckedContent);
+console.info(`The fact checked renaissance content is: ${factCheckedContent.content}`);
 
 const article = await chat.request(
   prompt.text('Write a blog post about the financial crisis of 2008'),
@@ -134,4 +137,4 @@ const titles = await chat.request(
   }),
 );
 
-console.info(article, entities, titles);
+console.info('Chat flow example:', article, entities, titles);
