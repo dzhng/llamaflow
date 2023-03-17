@@ -30,7 +30,14 @@ export default function buildRawPrompt(prompt: BulletPointsPrompt): RawPrompt<st
   return buildJSONPrompt({
     initialMessage: prompt.message,
     formatMessage: formatMessages.join(' '),
-    parseResponse: res => res.split('\n').map(s => s.replace('-', '').trim()),
+
+    // parse by splitting the returned text into individual lines, then filtering out the non-bulletpoint lines (sometimes the LLM will still return some other text, like an title or explaination).
+    parseResponse: res =>
+      res
+        .split('\n')
+        .filter(s => s.includes('-'))
+        .map(s => s.replace('-', '').trim()),
+
     schema: prompt.amount
       ? arraySchema.length(
           prompt.amount,
