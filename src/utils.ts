@@ -22,10 +22,11 @@ export type IsFunction<T, K extends keyof T> = T[K] extends (...args: any[]) => 
   ? true
   : false;
 
-export type GetRawPromptReturnType<T extends RawPrompt> = T['parse'] extends undefined
-  ? string
-  : T['parse'] extends Function
-  ? Awaited<ReturnType<T['parse']>>
+export type GetRawPromptReturnType<T extends RawPrompt> = IsFunction<
+  Required<T>,
+  'parse'
+> extends true
+  ? Awaited<ReturnType<NonNullable<T['parse']>>>
   : never;
 
 export type PromptReturnType<T extends string | RawPrompt> = T extends string
