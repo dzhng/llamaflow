@@ -37,6 +37,7 @@
     "build": "tsc --build --pretty",
     "lint": "eslint src --ext ts,tsx,js,jsx --ignore-path .gitignore --fix",
     "test": "jest --passWithNoTests",
+    "test:update": "jest -u --passWithNoTests",
     "playground": "node -r tsconfig-paths/register -r ts-node/register src/examples/playground"
   },
   "dependencies": {

@@ -1,6 +1,5 @@
-import debug from 'debug';
-
 import { Model } from 'models/interface';
+import { debug } from 'utils';
 
 import { PromptDefaultRetries } from './config';
 import { buildMessage } from './persona';

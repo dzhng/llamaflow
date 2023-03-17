@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Prompt types Should build JSON prompt correctly 1`] = `
+{
+  "message": "What are some good baby names?
+Respond as a JSON array, where each element in the array is one name.",
+  "parse": [Function],
+}
+`;
+
+exports[`Prompt types Should build boolean prompt correctly 1`] = `
+{
+  "message": "The iPhone 14 was released in 2012
+Please respond to the above statement only with the word "true" or "false", nothing else.",
+  "parse": [Function],
+}
+`;
+
+exports[`Prompt types Should build bullet prompt correctly 1`] = `
+{
+  "message": "What are the meanings of life?
+Write the response in bullet points, where each bullet point starts with the - character.",
+  "parse": [Function],
+}
+`;
+
+exports[`Prompt types Should build bullet prompt correctly 2`] = `
+{
+  "message": "What are the meanings of life?
+Write the response in bullet points, where each bullet point starts with the - character. There should be exactly 10 bullet points",
+  "parse": [Function],
+}
+`;
+
+exports[`Prompt types Should build bullet prompt correctly 3`] = `
+{
+  "message": "What are the meanings of life?
+Write the response in bullet points, where each bullet point starts with the - character. Each bullet point should be less than 140 characters long, including white spaces. There should be exactly 3 bullet points",
+  "parse": [Function],
+}
+`;

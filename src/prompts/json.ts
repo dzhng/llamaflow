@@ -10,7 +10,7 @@ export default function buildRawPrompt<T extends z.ZodType>(
   prompt: JSONPrompt<T>,
 ): RawPrompt<z.infer<T>> {
   return {
-    message: `${prompt.initialMessage} ${prompt.formatMessage}`,
+    message: `${prompt.initialMessage}\n${prompt.formatMessage}`,
     parse: async response => {
       const isArray = prompt.schema instanceof ZodArray;
       try {

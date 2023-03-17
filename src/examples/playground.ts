@@ -127,7 +127,7 @@ async function go() {
 
   const titles = await chat.request(
     prompt.bulletPoints({
-      message: 'Write a good title for this post',
+      message: 'Write a good title for this post.',
       amount: 10,
     }),
   );
