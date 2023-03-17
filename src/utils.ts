@@ -16,21 +16,24 @@ export function sleep(delay: number) {
   });
 }
 
-export type IsFunction<T, K extends keyof T> = T[K] extends (...args: any[]) => any
+type IsFunction<T, K extends keyof T> = T[K] extends (...args: any[]) => any
   ? true
   : T[K] extends (...args: any[]) => Promise<any>
   ? true
   : false;
 
-export type GetRawPromptReturnType<T extends RawPrompt> = IsFunction<
-  Required<T>,
-  'parse'
-> extends true
+type PickData<T> = T extends { data?: any } ? T['data'] : undefined;
+
+type GetRawPromptResponse<T extends RawPrompt> = IsFunction<Required<T>, 'parse'> extends true
   ? Awaited<ReturnType<NonNullable<T['parse']>>>
+  : never;
+
+type GetRawPromptDataType<T extends RawPrompt> = GetRawPromptResponse<T> extends object
+  ? NonNullable<PickData<GetRawPromptResponse<T>>>
   : never;
 
 export type PromptReturnType<T extends string | RawPrompt> = T extends string
   ? string
   : T extends RawPrompt<any>
-  ? GetRawPromptReturnType<T>
+  ? GetRawPromptDataType<T>
   : never;

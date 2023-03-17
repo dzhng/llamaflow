@@ -1,6 +1,5 @@
 import { Model } from '~/models/interface';
 import { PromptDefaultRetries } from './config';
-
 import { buildMessage } from './persona';
 import type {
   ChatConfig,
@@ -10,14 +9,7 @@ import type {
   Persona,
   RawPrompt,
 } from './types';
-import { GetRawPromptReturnType } from './utils';
-
-const prompt: RawPrompt<object> = {
-  message: 'hello',
-  parse: async () => ({ success: true, data: {} }),
-};
-
-type pt = GetRawPromptReturnType<typeof prompt>;
+import { PromptReturnType } from './utils';
 
 export class Chat {
   persona: Persona;
