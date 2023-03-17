@@ -1,13 +1,12 @@
 import jsonic from 'jsonic';
 import { get } from 'lodash';
-import { ZodArray } from 'zod';
+import { z, ZodArray } from 'zod';
 import type { JSONPrompt, RawPrompt } from '~/types';
 import { extractJSONArrayResponse, extractJSONObjectResponse } from './extracter';
-import { PromptInternal } from './index';
 
-export default function buildRawPrompt<T>(
-  prompt: JSONPrompt<T> & PromptInternal<'json'>,
-): RawPrompt {
+export default function buildRawPrompt<T extends z.ZodType>(
+  prompt: JSONPrompt<T>,
+): RawPrompt<z.infer<T>> {
   return {
     message: `${prompt.initialMessage} ${prompt.formatMessage}`,
     parse: async response => {
@@ -57,5 +56,5 @@ export default function buildRawPrompt<T>(
         };
       }
     },
-  } as RawPrompt<T>;
+  };
 }

@@ -31,15 +31,15 @@ export class Chat {
     ];
   }
 
-  async request(prompt: string | RawPrompt, opt?: ChatRequestOptions): Promise<ChatResponse<any>> {
-    const coercedPrompt =
-      typeof prompt === 'string' ? ({ message: prompt } as RawPrompt<string>) : prompt;
-
+  async request<T extends RawPrompt<any>>(
+    prompt: T,
+    opt?: ChatRequestOptions,
+  ): Promise<ChatResponse<PromptReturnType<T>>> {
     const newMessages: Message[] = [
       ...(opt?.messages ? opt.messages : this.messages),
       {
         role: 'user',
-        content: coercedPrompt.message,
+        content: prompt.message,
       },
     ];
     const response = await this.model.request(newMessages, this.persona.config, opt);
@@ -56,8 +56,8 @@ export class Chat {
     ];
 
     // validate res content, and recursively loop if invalid
-    if (coercedPrompt.parse) {
-      const res = await coercedPrompt.parse(response);
+    if (prompt.parse) {
+      const res = await prompt.parse(response);
       if (res.success) {
         if (this.config.retainMemory) {
           this.messages = messagesWithResponse;
@@ -69,11 +69,11 @@ export class Chat {
         };
       } else {
         // iterate recursively until promptRetries are up
-        const promptRetries = coercedPrompt.promptRetries ?? PromptDefaultRetries;
+        const promptRetries = prompt.promptRetries ?? PromptDefaultRetries;
         if (promptRetries > 0 && res.retryPrompt) {
           return this.request(
             {
-              ...coercedPrompt,
+              ...prompt,
               message: res.retryPrompt,
               promptRetries: promptRetries - 1,
             },
@@ -91,6 +91,6 @@ export class Chat {
       this.messages = messagesWithResponse;
     }
 
-    return response;
+    return response as any;
   }
 }

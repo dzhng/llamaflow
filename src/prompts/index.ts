@@ -5,22 +5,13 @@ import buildJSONPrompt from './json';
 
 export type PromptKind = 'json' | 'bullet-points';
 
-export type PromptReturnType<T> = T extends string
-  ? string
-  : T extends BulletPointsPrompt
-  ? string[]
-  : T extends JSONPrompt
-  ? z.infer<T['schema']>
-  : unknown;
+export const text = (p: string | RawPrompt<string>): RawPrompt<string> =>
+  typeof p === 'string' ? { message: p } : p;
 
-export interface PromptInternal<T extends PromptKind> {
-  _kind: T;
-}
+export const json = <T extends z.ZodType>(p: JSONPrompt<T>): z.infer<T> => buildJSONPrompt(p);
 
-export const raw = (p: RawPrompt) => p;
+export const bulletPoints = (p: BulletPointsPrompt): RawPrompt<string[]> =>
+  buildBulletPointsPrompt(p);
 
-export const json = (p: JSONPrompt) =>
-  buildJSONPrompt<z.infer<typeof p.schema>>({ ...p, _kind: 'json' });
-
-export const bulletPoints = (p: BulletPointsPrompt) =>
-  buildBulletPointsPrompt({ ...p, _kind: 'bullet-points' });
+const test = <T extends z.ZodType>(t: T): z.infer<T> => t.parse({ a: 'b' });
+const t = test(z.object({}));

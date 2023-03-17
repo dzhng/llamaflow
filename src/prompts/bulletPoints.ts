@@ -1,11 +1,8 @@
 import { z } from 'zod';
 import { BulletPointsPrompt, RawPrompt } from '~/types';
-import { PromptInternal } from './index';
 import buildJSONPrompt from './json';
 
-export default function buildRawPrompt(
-  prompt: BulletPointsPrompt & PromptInternal<'bullet-points'>,
-): RawPrompt<string[]> {
+export default function buildRawPrompt(prompt: BulletPointsPrompt): RawPrompt<string[]> {
   const arraySchema = z.array(
     prompt.length
       ? z
@@ -17,8 +14,7 @@ export default function buildRawPrompt(
       : z.string(),
   );
 
-  return buildJSONPrompt<z.infer<typeof arraySchema>>({
-    _kind: 'json',
+  return buildJSONPrompt({
     initialMessage: prompt.message,
     formatMessage:
       'Write the response in bullet points, where each bullet point starts with the - character.' +

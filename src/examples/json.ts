@@ -35,7 +35,9 @@ const chat = llamaFlow.chat(writer, {
 });
 
 const response = await chat.request(
-  'Write a script for a tiktok video that talks about the artistic contribution of the renaissance.',
+  prompt.text(
+    'Write a script for a tiktok video that talks about the artistic contribution of the renaissance.',
+  ),
 );
 
 // The results, as well as any usage stats, will be returned.
@@ -77,7 +79,7 @@ const factChecker: Persona = {
 const factCheckerChat = llamaFlow.chat(factChecker);
 
 const buildFactCheckedPrompt = (article: string) =>
-  prompt.raw({
+  prompt.text({
     message: `Please write a summary about the following article: ${article}`,
     promptRetries: 2,
     parse: async response => {
@@ -111,7 +113,9 @@ const factCheckedContent = await chat.request(
 
 console.log(factCheckedContent);
 
-const article = await chat.request('Write a blog post about the financial crisis of 2008');
+const article = await chat.request(
+  prompt.text('Write a blog post about the financial crisis of 2008'),
+);
 
 const entities = await chat.request(
   prompt.json({

@@ -54,11 +54,11 @@ export interface Message {
 
 // Prompt types
 
-export interface JSONPrompt<T = any> {
+export interface JSONPrompt<T extends z.ZodType> {
   initialMessage: string;
   formatMessage?: string;
-  parseResponse?: (res: string) => T;
-  schema: z.ZodType<T>;
+  parseResponse?: (res: string) => z.infer<T>;
+  schema: T;
   promptRetries?: number;
 }
 
@@ -69,7 +69,7 @@ export interface BulletPointsPrompt {
   promptRetries?: number;
 }
 
-export interface RawPrompt<T = any> {
+export interface RawPrompt<T = string> {
   message: string;
   parse?: (
     response: ChatResponse<string>,
