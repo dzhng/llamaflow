@@ -22,14 +22,9 @@ export class Chat {
     this.persona = persona;
     this.config = config;
     this.model = model;
+    this.messages = [];
 
-    // build system message
-    this.messages = [
-      {
-        role: 'system',
-        content: buildMessage(this.persona),
-      },
-    ];
+    this.reset();
   }
 
   async request<T>(prompt: RawPrompt<T>, opt?: ChatRequestOptions): Promise<ChatResponse<T>> {
@@ -72,7 +67,7 @@ export class Chat {
         const promptRetries = prompt.promptRetries ?? PromptDefaultRetries;
         if (promptRetries > 0 && res.retryPrompt) {
           debug.log(
-            `⚠️ retrying request with prompt: ${res.retryPrompt}... current message stack:`,
+            `⚠️ retrying request with prompt: ${res.retryPrompt}\nCurrent message stack:`,
             messagesWithResponse,
           );
           return this.request(
@@ -97,5 +92,15 @@ export class Chat {
     // Type 'ChatResponse<string>' is not assignable to type 'ChatResponse<T>'
     // Will cast to any for now
     return response as any;
+  }
+
+  reset() {
+    // build system message
+    this.messages = [
+      {
+        role: 'system',
+        content: buildMessage(this.persona),
+      },
+    ];
   }
 }

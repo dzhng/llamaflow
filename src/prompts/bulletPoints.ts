@@ -18,11 +18,13 @@ export default function buildRawPrompt(prompt: BulletPointsPrompt): RawPrompt<st
   );
 
   const formatMessages = compact([
-    'Write the response in bullet points, where each bullet point starts with the - character.',
+    "Respond in bullet points, where each bullet point starts with the - character. Don't include any other text other than the bullet points.",
     prompt.length
       ? `Each bullet point should be less than ${prompt.length} characters long, including white spaces.`
       : undefined,
-    prompt.amount ? `There should be exactly ${prompt.amount} bullet points` : undefined,
+    prompt.amount
+      ? `There should be exactly ${prompt.amount} bullet points, no more or less.`
+      : undefined,
   ]);
 
   return buildJSONPrompt({
@@ -30,7 +32,10 @@ export default function buildRawPrompt(prompt: BulletPointsPrompt): RawPrompt<st
     formatMessage: formatMessages.join(' '),
     parseResponse: res => res.split('\n').map(s => s.replace('-', '').trim()),
     schema: prompt.amount
-      ? arraySchema.length(prompt.amount, `There should be exactly ${prompt.amount} bullet points`)
+      ? arraySchema.length(
+          prompt.amount,
+          `There should be exactly ${prompt.amount} bullet points, no more or less.`,
+        )
       : arraySchema,
   });
 }

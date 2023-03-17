@@ -19,15 +19,15 @@ async function go() {
     ],
   };
 
-  const bulletPrompt = prompt.json({
+  const chat = llamaFlow.chat(writer, {
+    retainMemory: true,
+  });
+
+  /*const bulletPrompt = prompt.json({
     initialMessage: 'Please rewrite this in a list of bullet points.',
     formatMessage:
       'Respond as a JSON array, where each element in the array is one bullet point. Keep each bullet point to be 200 characters max. For example: ["bullet point 1", "bullet point 2"]',
     schema: z.array(z.string().max(200)),
-  });
-
-  const chat = llamaFlow.chat(writer, {
-    retainMemory: true,
   });
 
   const response = await chat.request(
@@ -110,7 +110,9 @@ async function go() {
     ),
   );
 
-  console.info(`The fact checked renaissance content is: ${factCheckedContent.content}`);
+  console.info(`The fact checked renaissance content is: ${factCheckedContent.content}`);*/
+
+  chat.reset();
 
   const article = await chat.request(
     prompt.text('Write a blog post about the financial crisis of 2008'),

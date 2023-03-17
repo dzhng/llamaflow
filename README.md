@@ -1,6 +1,6 @@
 # LLamaFlow
 
-A set of utilities to better work with chat based LLMs (e.g. ChatGPT from OpenAI) for Typescript.
+The Typescript first LLM prompt engineering toolkit for structured retrieval.
 
 LLamaFlow is meant to be the middleware layer that sits between your software and the AI model. The pattern for generating correct outputs from LLMs is converging on _ask and validate_, where after the initial generation, there is a back-and-forth with the model itself to correct the output according to spec. LLamaFlow abstracts away this entire process, and exposes a simple request & response API for the model where all responses are validated.
 
@@ -172,6 +172,9 @@ const factCheckedContent = await chat.request(
 Because this is an API, it's often useful to keep requesting from the same chat. Often the message history will serve as context for the next request. A good example use case is a prompt to first write some content, then extract entities, and lastly, give some options for the title.
 
 ```typescript
+// You can reset chat history anytime with `reset()`, however, this is an anti-pattern, as it is prone to mistakes. It's much safer to just initialize a new chat.
+chat.reset();
+
 const article = await chat.request(
   prompt.text('Write a blog post about the financial crisis of 2008'),
 );

@@ -3,6 +3,7 @@ import { get } from 'lodash';
 import { z, ZodArray } from 'zod';
 
 import type { JSONPrompt, RawPrompt } from 'types';
+import { debug } from 'utils';
 
 import { extractJSONArrayResponse, extractJSONObjectResponse } from './extracter';
 
@@ -37,11 +38,14 @@ export default function buildRawPrompt<T extends z.ZodType>(
         if (parsed.success) {
           return { success: true, data: parsed.data };
         } else {
+          debug.error('Error parsing json:', parsed.error);
           const issuesMessage = parsed.error.issues.reduce(
             (prev, issue) =>
-              `${prev}\nThere is an issue with the the value "${get(json, issue.path)}", at ${
-                isArray ? `index ${issue.path[0]}` : `path ${issue.path.join('.')}`
-              }. The issue is: ${issue.message}`,
+              issue.path && issue.path.length > 0
+                ? `${prev}\nThere is an issue with the the value "${get(json, issue.path)}", at ${
+                    isArray ? `index ${issue.path[0]}` : `path ${issue.path.join('.')}`
+                  }. The issue is: ${issue.message}`
+                : `The issue is: ${issue.message}`,
             '',
           );
           return {

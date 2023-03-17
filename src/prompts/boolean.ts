@@ -3,7 +3,7 @@ import type { BooleanPrompt, RawPrompt } from 'types';
 const truthyValues = ['true', 'yes'];
 const falsyValues = ['false', 'no'];
 const formatPrompt =
-  'Please respond to the above statement only with the word "true" or "false", nothing else.';
+  'Respond to the above statement only with the word "true" or "false", nothing else.';
 
 export default function buildRawPrompt(prompt: BooleanPrompt): RawPrompt<boolean> {
   return {
