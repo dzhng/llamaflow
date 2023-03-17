@@ -1,6 +1,8 @@
 {
   "name": "llama-flow",
   "packageManager": "yarn@3.4.1",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "scripts": {
     "prepare": "husky install",
     "build": "tsc --build --pretty",
