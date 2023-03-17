@@ -1,4 +1,4 @@
-import { Model } from '~/models/interface';
+import { Model } from 'models/interface';
 
 import { PromptDefaultRetries } from './config';
 import { buildMessage } from './persona';

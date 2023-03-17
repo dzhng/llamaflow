@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { BulletPointsPrompt, RawPrompt } from '~/types';
+import { BulletPointsPrompt, RawPrompt } from 'types';
 
 import buildJSONPrompt from './json';
 

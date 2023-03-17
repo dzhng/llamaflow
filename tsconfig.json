@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
     "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "nodenext",
     "lib": ["dom", "esnext"],
     "allowJs": true,
     "alwaysStrict": true,
@@ -9,13 +11,10 @@
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
-    "module": "esnext",
-    "moduleResolution": "node",
     "resolveJsonModule": true,
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "jsx": "preserve",
     "noImplicitAny": true,
     "noImplicitThis": true,
     "strictNullChecks": true,
@@ -23,12 +22,12 @@
     "composite": true,
     "declarationMap": true,
     "rootDir": ".",
-    "baseUrl": ".",
-    "outDir": "dist",
-    "paths": {
-      "~/*": ["src/*"]
-    }
+    "baseUrl": "src",
+    "outDir": "dist"
   },
-  "include": ["./src/**/*"],
-  "exclude": ["dist", "node_modules", "**/__mocks__/*"]
+  "include": ["src/**/*"],
+  "exclude": ["dist", "node_modules", "**/__mocks__/*"],
+  "ts-node": {
+    "compilerOptions": { "module": "commonjs" }
+  }
 }

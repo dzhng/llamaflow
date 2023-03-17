@@ -1,4 +1,4 @@
-import { ChatRequestOptions, ChatResponse, Message, ModelConfig } from '~/types';
+import { ChatRequestOptions, ChatResponse, Message, ModelConfig } from 'types';
 
 export interface Model {
   request(

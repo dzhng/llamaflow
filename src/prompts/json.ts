@@ -2,7 +2,7 @@ import jsonic from 'jsonic';
 import { get } from 'lodash';
 import { z, ZodArray } from 'zod';
 
-import type { JSONPrompt, RawPrompt } from '~/types';
+import type { JSONPrompt, RawPrompt } from 'types';
 
 import { extractJSONArrayResponse, extractJSONObjectResponse } from './extracter';
 
