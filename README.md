@@ -1,5 +1,7 @@
 # LLamaFlow
 
+[![test](https://github.com/dzhng/llamaflow/actions/workflows/test.yml/badge.svg?branch=main&event=push)](https://github.com/dzhng/llamaflow/actions/workflows/test.yml)
+
 The Typescript first prompt engineering toolkit for working with LLMs.
 
 - [Introduction](#introduction)

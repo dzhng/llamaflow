@@ -3,12 +3,10 @@ module.exports = {
   testEnvironment: 'node',
   clearMocks: true,
   roots: ['<rootDir>/src'],
+  modulePaths: ['<rootDir>/src'],
   testRegex: '(/__tests__/.*|(\\.|/)(test))\\.tsx?$',
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   reporters: ['default'],
-  moduleNameMapper: {
-    '^~/(.*)$': '<rootDir>/src/$1',
-  },
   globals: {
     // we must specify a custom tsconfig for tests because we need the typescript transform
     // to transform jsx into js rather than leaving it jsx such as the next build requires.  you

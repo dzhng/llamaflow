@@ -11,7 +11,7 @@ Respond as a JSON array, where each element in the array is one name.",
 exports[`Prompt types Should build boolean prompt correctly 1`] = `
 {
   "message": "The iPhone 14 was released in 2012
-Please respond to the above statement only with the word "true" or "false", nothing else.",
+Respond to the above statement only with the word "true" or "false", nothing else.",
   "parse": [Function],
 }
 `;
@@ -19,7 +19,7 @@ Please respond to the above statement only with the word "true" or "false", noth
 exports[`Prompt types Should build bullet prompt correctly 1`] = `
 {
   "message": "What are the meanings of life?
-Write the response in bullet points, where each bullet point starts with the - character.",
+Respond in bullet points, where each bullet point starts with the - character. Don't include any other text other than the bullet points.",
   "parse": [Function],
 }
 `;
@@ -27,7 +27,7 @@ Write the response in bullet points, where each bullet point starts with the - c
 exports[`Prompt types Should build bullet prompt correctly 2`] = `
 {
   "message": "What are the meanings of life?
-Write the response in bullet points, where each bullet point starts with the - character. There should be exactly 10 bullet points",
+Respond in bullet points, where each bullet point starts with the - character. Don't include any other text other than the bullet points. There should be exactly 10 bullet points, no more or less.",
   "parse": [Function],
 }
 `;
@@ -35,7 +35,7 @@ Write the response in bullet points, where each bullet point starts with the - c
 exports[`Prompt types Should build bullet prompt correctly 3`] = `
 {
   "message": "What are the meanings of life?
-Write the response in bullet points, where each bullet point starts with the - character. Each bullet point should be less than 140 characters long, including white spaces. There should be exactly 3 bullet points",
+Respond in bullet points, where each bullet point starts with the - character. Don't include any other text other than the bullet points. Each bullet point should be less than 140 characters long, including white spaces. There should be exactly 3 bullet points, no more or less.",
   "parse": [Function],
 }
 `;
