@@ -1,6 +1,6 @@
 {
   "name": "llama-flow",
-  "description": "The Typescript first prompt engineering toolkit for working with chat based LLMs.",
+  "description": "The Typescript-first prompt engineering toolkit for working with chat based LLMs.",
   "version": "0.2.3",
   "packageManager": "yarn@3.4.1",
   "main": "dist/src/index.js",
