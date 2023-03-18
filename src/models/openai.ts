@@ -40,10 +40,10 @@ export class OpenAI implements Model {
   private openai: OpenAIApi;
   private defaults: ModelConfig;
 
-  constructor(config: OpenAIConfig, defaults: ModelConfig) {
+  constructor(config: OpenAIConfig, defaults?: ModelConfig) {
     const configuration = new Configuration({ apiKey: config.apiKey });
     this.openai = new OpenAIApi(configuration);
-    this.defaults = defaults;
+    this.defaults = defaults ?? {};
   }
 
   chat(persona: Persona, config?: ChatConfig) {

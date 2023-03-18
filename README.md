@@ -50,7 +50,7 @@ To setup in your codebase, initialize a new instance with the model you want (on
 ```typescript
 import { OpenAI } from 'llama-flow';
 
-const llamaFlow = new OpenAI({ apiKey: 'YOUR_OPENAI_KEY' }, { temperature: 0.7 });
+const llamaFlow = new OpenAI({ apiKey: 'YOUR_OPENAI_KEY' });
 ```
 
 ### Personas
