@@ -23,7 +23,7 @@ async function go() {
     retainMemory: true,
   });
 
-  /*const bulletPrompt = prompt.json({
+  const bulletPrompt = prompt.json({
     initialMessage: 'Please rewrite this in a list of bullet points.',
     formatMessage:
       'Respond as a JSON array, where each element in the array is one bullet point. Keep each bullet point to be 200 characters max. For example: ["bullet point 1", "bullet point 2"]',
@@ -110,7 +110,7 @@ async function go() {
     ),
   );
 
-  console.info(`The fact checked renaissance content is: ${factCheckedContent.content}`);*/
+  console.info(`The fact checked renaissance content is: ${factCheckedContent.content}`);
 
   chat.reset();
 
@@ -122,7 +122,7 @@ async function go() {
     prompt.json({
       initialMessage: 'What are the different entities in the above blog post?',
       formatMessage:
-        'Respond in a JSON array, where the items in the array are just the names of the entities.',
+        'Respond as a JSON array, where the items in the array are just the names of the entities.',
       schema: z.array(z.string()),
     }),
   );
