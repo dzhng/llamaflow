@@ -4,15 +4,15 @@
 
 The Typescript-first prompt engineering toolkit for working with chat based large language models (LLMs).
 
-- [Introduction](#introduction)
-- [Why](#why-llamaflow)
-- [Usage](#usage)
+- [Introduction](#👋-introduction)
+- [Why](#🤔-why-llamaflow)
+- [Usage](#🔨-usage)
   - [Install](#install)
   - [Personas](#personas)
   - [Prompts](#prompts)
   - [Chats](#chats)
   - [Custom Prompts](#custom-prompts)
-- [Debugging](#debugging)
+- [Debugging](#🤓-debugging)
 
 ## 👋 Introduction
 
@@ -34,7 +34,7 @@ TLDR:
 - Everything is Typescript-first with responses fully validated & typed, works great with the excellent [zod](https://github.com/colinhacks/zod) package as a peer dep.
 - Chat based completion only - there are no plans to support traditional LLM completion. I believe chat inspired LLM APIs are where all foundation models are converging to, due to the steerability provided by having explicit separation of system & user prompts.
 
-If you are wondering why the name LLamaFlow - LLama is a play on LLM.
+If you are wondering why the name LLamaFlow - 🦙 LLama is a play on LLM.
 
 ## 🔨 Usage
 
