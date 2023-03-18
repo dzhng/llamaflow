@@ -4,15 +4,15 @@
 
 The Typescript-first prompt engineering toolkit for working with chat based large language models (LLMs).
 
-- [Introduction](#👋-introduction)
-- [Why](#🤔-why-llamaflow)
-- [Usage](#🔨-usage)
+- [Introduction](#-introduction)
+- [Why](#-why-llamaflow)
+- [Usage](#-usage)
   - [Install](#install)
   - [Personas](#personas)
   - [Prompts](#prompts)
   - [Chats](#chats)
   - [Custom Prompts](#custom-prompts)
-- [Debugging](#🤓-debugging)
+- [Debugging](#-debugging)
 
 ## 👋 Introduction
 
