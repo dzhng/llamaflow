@@ -1,4 +1,4 @@
-import type { BooleanPrompt, RawPrompt } from 'types';
+import type { BooleanPrompt, RawPrompt } from '../types';
 
 const truthyValues = ['true', 'yes'];
 const falsyValues = ['false', 'no'];

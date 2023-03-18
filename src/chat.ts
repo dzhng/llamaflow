@@ -1,7 +1,5 @@
-import { Model } from 'models/interface';
-import { debug } from 'utils';
-
 import { PromptDefaultRetries } from './config';
+import { Model } from './models/interface';
 import { buildMessage } from './persona';
 import type {
   ChatConfig,
@@ -11,6 +9,7 @@ import type {
   Persona,
   RawPrompt,
 } from './types';
+import { debug } from './utils';
 
 export class Chat {
   persona: Persona;

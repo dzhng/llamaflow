@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import type { BooleanPrompt, BulletPointsPrompt, JSONPrompt, RawPrompt } from 'types';
+import type { BooleanPrompt, BulletPointsPrompt, JSONPrompt, RawPrompt } from '../types';
 
 import buildBooleanPrompt from './boolean';
 import buildBulletPointsPrompt from './bulletPoints';

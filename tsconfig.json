@@ -17,8 +17,6 @@
     "noImplicitAny": true,
     "noImplicitThis": true,
     "strictNullChecks": true,
-    "rootDir": ".",
-    "baseUrl": "src",
 
     // compile settings
     "module": "commonjs",
