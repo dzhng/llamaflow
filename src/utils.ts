@@ -18,6 +18,8 @@ export function sleep(delay: number) {
   });
 }
 
+export type MaybePromise<T> = Promise<T> | T;
+
 type IsFunction<T, K extends keyof T> = T[K] extends (...args: any[]) => any
   ? true
   : T[K] extends (...args: any[]) => Promise<any>

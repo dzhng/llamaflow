@@ -31,7 +31,7 @@ export default function buildRawPrompt<T extends z.ZodType>(
 
           json = jsonic(extracted);
         } else {
-          json = prompt.parseResponse(response.content);
+          json = await prompt.parseResponse(response.content);
         }
 
         const parsed = prompt.schema.safeParse(json);

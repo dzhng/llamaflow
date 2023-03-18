@@ -1,10 +1,11 @@
-# LLamaFlow
+# 🦙 LLamaFlow
 
 [![test](https://github.com/dzhng/llamaflow/actions/workflows/test.yml/badge.svg?branch=main&event=push)](https://github.com/dzhng/llamaflow/actions/workflows/test.yml)
 
 The Typescript-first prompt engineering toolkit for working with chat based large language models (LLMs).
 
 - [Introduction](#introduction)
+- [Why](#why-llamaflow)
 - [Usage](#usage)
   - [Install](#install)
   - [Personas](#personas)
@@ -13,23 +14,29 @@ The Typescript-first prompt engineering toolkit for working with chat based larg
   - [Custom Prompts](#custom-prompts)
 - [Debugging](#debugging)
 
-## Introduction
+## 👋 Introduction
 
 LLamaFlow is the middleware layer that sits between your software and the AI model. The pattern for generating correct outputs from LLMs is converging on _ask and validate_, where after the initial generation, there is a back-and-forth with the model itself to correct the output according to spec. LLamaFlow abstracts away this entire process, and exposes a simple request & response API for the model where all responses are validated.
 
 Specifically, this package adds the following capabilities on top of the standard chat API:
 
 - Nicer API for sending & retriving messages from models, no need to keep track of message memory manually.
-- Custom content validation hook that allows you to add your own valider for all model outputs, including reasking the model.
 - Schema definition, serialization / parsing, and **automatically asking the model to correct outputs**.
+- Custom content validation hook that allows you to add your own valider for all model outputs, including logic on how to reask the model.
 - Handle rate limit and any other API errors as gracefully as possible (e.g. exponential backoff for rate-limit).
 
-Compared to other prompt engineering solutions, LLamaFlow differentiates by being chat native and structured output by default:
+## 🤔 Why LLamaFlow
+
+There are a few other prompt engineering libraries for typescript / javascript, most notiably [Langchain](https://github.com/hwchase17/langchainjs). Compared to other solutions, LLamaFlow differentiates by being chat-first and supports structured, _fully typed_ output by default. LLamaFlow also focuses purely on interacting with the model - it doesn't have the complexity of managing multiple types of chains / agents / memory, which should hopefully make for a much simpler & more extensible API. When working with LLamaFlow, you are expected to add memory / agents yourself (or even just integrate it into Langchain!)
+
+TLDR:
 
 - Everything is Typescript-first with responses fully validated & typed, works great with the excellent [zod](https://github.com/colinhacks/zod) package as a peer dep.
 - Chat based completion only - there are no plans to support traditional LLM completion. I believe chat inspired LLM APIs are where all foundation models are converging to, due to the steerability provided by having explicit separation of system & user prompts.
 
-## Usage
+If you are wondering why the name LLamaFlow - LLama is a play on LLM.
+
+## 🔨 Usage
 
 ### Install
 
@@ -228,7 +235,7 @@ const titles = await chat.request(
 );
 ```
 
-### Debugging
+## 🤓 Debugging
 
 LLamaFlow usese the `debug` module for logging & error messages. To run in debug mode, set the `DEBUG` env variable:
 

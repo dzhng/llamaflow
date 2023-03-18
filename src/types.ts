@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { MaybePromise } from './utils';
+
 export interface OpenAIConfig {
   apiKey: string;
 }
@@ -57,7 +59,7 @@ export interface Message {
 export interface JSONPrompt<T extends z.ZodType> {
   initialMessage: string;
   formatMessage?: string;
-  parseResponse?: (res: string) => z.infer<T>;
+  parseResponse?: (res: string) => MaybePromise<z.infer<T>>;
   schema: T;
   promptRetries?: number;
 }
@@ -78,6 +80,6 @@ export interface RawPrompt<T = string> {
   message: string;
   parse?: (
     response: ChatResponse<string>,
-  ) => Promise<{ success: false; retryPrompt?: string } | { success: true; data: T }>;
+  ) => MaybePromise<{ success: false; retryPrompt?: string } | { success: true; data: T }>;
   promptRetries?: number;
 }
