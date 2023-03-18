@@ -1,7 +1,7 @@
 {
   "name": "llama-flow",
   "description": "The Typescript-first prompt engineering toolkit for working with chat based LLMs.",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "packageManager": "yarn@3.4.1",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
@@ -33,7 +33,7 @@
     "url": "https://github.com/dzhng/llamaflow/issues"
   },
   "scripts": {
-    "postinstall": "husky install",
+    "setup": "husky install",
     "build": "tsc --build --pretty",
     "lint": "eslint src --ext ts,tsx,js,jsx --ignore-path .gitignore --fix",
     "test": "jest --passWithNoTests",
