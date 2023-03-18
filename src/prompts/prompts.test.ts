@@ -40,8 +40,8 @@ describe('Prompt types', () => {
   it('Should build JSON prompt correctly', () => {
     expect(
       buildJSONPrompt({
-        initialMessage: 'What are some good baby names?',
-        formatMessage: 'Respond as a JSON array, where each element in the array is one name.',
+        message:
+          'What are some good baby names? Respond as a JSON array, where each element in the array is one name.',
         schema: z.array(z.string()),
       }),
     ).toMatchSnapshot();

@@ -57,8 +57,8 @@ export interface Message {
 // Prompt types
 
 export interface JSONPrompt<T extends z.ZodType> {
-  initialMessage: string;
-  formatMessage?: string;
+  message: string;
+  retryMessage?: string;
   parseResponse?: (res: string) => MaybePromise<z.infer<T>>;
   schema: T;
   promptRetries?: number;

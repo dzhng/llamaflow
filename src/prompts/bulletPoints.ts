@@ -18,7 +18,7 @@ export default function buildRawPrompt(prompt: BulletPointsPrompt): RawPrompt<st
   );
 
   const formatMessages = compact([
-    "Respond in bullet points, where each bullet point starts with the - character. Don't include any other text other than the bullet points.",
+    "Respond to the prompt below in bullet points, where each bullet point starts with the - character. Don't include any other text other than the bullet points.",
     prompt.length
       ? `Each bullet point should be less than ${prompt.length} characters long, including white spaces.`
       : undefined,
@@ -28,8 +28,7 @@ export default function buildRawPrompt(prompt: BulletPointsPrompt): RawPrompt<st
   ]);
 
   return buildJSONPrompt({
-    initialMessage: prompt.message,
-    formatMessage: formatMessages.join(' '),
+    message: `${formatMessages.join(' ')}\nPrompt:\n${prompt.message}`,
 
     // parse by splitting the returned text into individual lines, then filtering out the non-bulletpoint lines (sometimes the LLM will still return some other text, like an title or explaination).
     parseResponse: res =>

@@ -11,7 +11,7 @@ export default function buildRawPrompt<T extends z.ZodType>(
   prompt: JSONPrompt<T>,
 ): RawPrompt<z.infer<T>> {
   return {
-    message: `${prompt.initialMessage}\n${prompt.formatMessage}`,
+    message: prompt.message,
     parse: async response => {
       const isArray = prompt.schema instanceof ZodArray;
       try {
@@ -24,8 +24,8 @@ export default function buildRawPrompt<T extends z.ZodType>(
             return {
               success: false,
               retryPrompt:
-                prompt.formatMessage ??
-                `No valid JSON ${isArray ? 'array' : 'object'} was found, try again.`,
+                prompt.retryMessage ??
+                `No valid JSON ${isArray ? 'array' : 'object'} was found, rewrite as valid JSON.`,
             };
           }
 
@@ -45,12 +45,12 @@ export default function buildRawPrompt<T extends z.ZodType>(
                 ? `${prev}\nThere is an issue with the the value "${get(json, issue.path)}", at ${
                     isArray ? `index ${issue.path[0]}` : `path ${issue.path.join('.')}`
                   }. The issue is: ${issue.message}`
-                : `The issue is: ${issue.message}`,
-            '',
+                : `\nThe issue is: ${issue.message}`,
+            'There is an issue with that response, please rewrite.',
           );
           return {
             success: false,
-            retryPrompt: ((prompt.formatMessage ?? '') + '\n' + issuesMessage).trim(),
+            retryPrompt: ((prompt.retryMessage ?? '') + '\n' + issuesMessage).trim(),
           };
         }
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -58,8 +58,8 @@ export default function buildRawPrompt<T extends z.ZodType>(
         return {
           success: false,
           retryPrompt:
-            prompt.formatMessage ??
-            `No valid JSON ${isArray ? 'array' : 'object'} was found, try again.`,
+            prompt.retryMessage ??
+            `No valid JSON ${isArray ? 'array' : 'object'} was found, rewrite as valid JSON.`,
         };
       }
     },

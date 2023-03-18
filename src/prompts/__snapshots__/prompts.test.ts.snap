@@ -2,8 +2,7 @@
 
 exports[`Prompt types Should build JSON prompt correctly 1`] = `
 {
-  "message": "What are some good baby names?
-Respond as a JSON array, where each element in the array is one name.",
+  "message": "What are some good baby names? Respond as a JSON array, where each element in the array is one name.",
   "parse": [Function],
 }
 `;
@@ -18,24 +17,27 @@ Respond to the above statement only with the word "true" or "false", nothing els
 
 exports[`Prompt types Should build bullet prompt correctly 1`] = `
 {
-  "message": "What are the meanings of life?
-Respond in bullet points, where each bullet point starts with the - character. Don't include any other text other than the bullet points.",
+  "message": "Respond to the following question in bullet points, where each bullet point starts with the - character. Don't include any other text other than the bullet points.
+Question:
+What are the meanings of life?",
   "parse": [Function],
 }
 `;
 
 exports[`Prompt types Should build bullet prompt correctly 2`] = `
 {
-  "message": "What are the meanings of life?
-Respond in bullet points, where each bullet point starts with the - character. Don't include any other text other than the bullet points. There should be exactly 10 bullet points, no more or less.",
+  "message": "Respond to the following question in bullet points, where each bullet point starts with the - character. Don't include any other text other than the bullet points. There should be exactly 10 bullet points, no more or less.
+Question:
+What are the meanings of life?",
   "parse": [Function],
 }
 `;
 
 exports[`Prompt types Should build bullet prompt correctly 3`] = `
 {
-  "message": "What are the meanings of life?
-Respond in bullet points, where each bullet point starts with the - character. Don't include any other text other than the bullet points. Each bullet point should be less than 140 characters long, including white spaces. There should be exactly 3 bullet points, no more or less.",
+  "message": "Respond to the following question in bullet points, where each bullet point starts with the - character. Don't include any other text other than the bullet points. Each bullet point should be less than 140 characters long, including white spaces. There should be exactly 3 bullet points, no more or less.
+Question:
+What are the meanings of life?",
   "parse": [Function],
 }
 `;

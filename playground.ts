@@ -21,9 +21,8 @@ async function go() {
   });
 
   const bulletPrompt = prompt.json({
-    initialMessage: 'Please rewrite this in a list of bullet points.',
-    formatMessage:
-      'Respond as a JSON array, where each element in the array is one bullet point. Keep each bullet point to be 200 characters max. For example: ["bullet point 1", "bullet point 2"]',
+    message:
+      'Please rewrite this in a list of bullet points. Respond as a JSON array, where each element in the array is one bullet point. Keep each bullet point to be 200 characters max. For example: ["bullet point 1", "bullet point 2"]',
     schema: z.array(z.string().max(200)),
   });
 
@@ -46,9 +45,8 @@ async function go() {
   );
 
   const parsedBulletPrompt = prompt.json({
-    initialMessage: 'Please rewrite this in a list of bullet points.',
-    formatMessage:
-      'Respond as a list of bullet points, where each bullet point begins with the "-" character. Each bullet point should be less than 200 characters. Put each bullet point on a new line.',
+    message:
+      'Please rewrite this in a list of bullet points. Respond as a list of bullet points, where each bullet point begins with the "-" character. Each bullet point should be less than 200 characters. Put each bullet point on a new line.',
 
     // parse the response from the model so it can be fed into the schema validator
     parseResponse: res => res.split('\n').map(s => s.replace('-', '').trim()),
@@ -117,9 +115,8 @@ async function go() {
 
   const entities = await chat.request(
     prompt.json({
-      initialMessage: 'What are the different entities in the above blog post?',
-      formatMessage:
-        'Respond as a JSON array, where the items in the array are just the names of the entities.',
+      message:
+        'What are the different entities in the above blog post? Respond as a JSON array, where the items in the array are just the names of the entities.',
       schema: z.array(z.string()),
     }),
   );
