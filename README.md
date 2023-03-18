@@ -27,7 +27,7 @@ Specifically, this package adds the following capabilities on top of the standar
 
 ## 🤔 Why LLamaFlow
 
-There are a few other prompt engineering libraries for typescript / javascript, most notiably [Langchain](https://github.com/hwchase17/langchainjs). Compared to other solutions, LLamaFlow differentiates by being chat-first and supports structured, _fully typed_ output by default. LLamaFlow also focuses purely on interacting with the model - it doesn't have the complexity of managing multiple types of chains / agents / memory, which should hopefully make for a much simpler & more extensible API. When working with LLamaFlow, you are expected to add memory / agents yourself (or even just integrate it into Langchain!)
+There are a few other prompt engineering libraries for typescript / javascript, most notiably [Langchain](https://github.com/hwchase17/langchainjs). Compared to other solutions, LLamaFlow differentiates by being chat-first and supports structured, _fully typed_ output by default. LLamaFlow also focuses purely on interacting with the model - it doesn't have the complexity of managing multiple types of chains / agents / memory, which should hopefully make for a much simpler & more extensible API. When working with LLamaFlow, you are expected to add memory / agents yourself (or even using it together with Langchain!)
 
 TLDR:
 
