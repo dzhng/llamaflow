@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "module": "esnext",
     "moduleResolution": "node",
     "lib": ["dom", "esnext"],
     "allowJs": true,
@@ -18,11 +17,15 @@
     "noImplicitAny": true,
     "noImplicitThis": true,
     "strictNullChecks": true,
-    "incremental": true,
-    "composite": true,
-    "declarationMap": true,
     "rootDir": ".",
     "baseUrl": "src",
+
+    // compile settings
+    "module": "commonjs",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": false,
+    "removeComments": true,
     "outDir": "dist"
   },
   "include": ["src/**/*", "playground.ts"],
