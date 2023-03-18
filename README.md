@@ -15,7 +15,7 @@ The Typescript-first prompt engineering toolkit for working with chat based larg
 
 ## Introduction
 
-LLamaFlow is meant to be the middleware layer that sits between your software and the AI model. The pattern for generating correct outputs from LLMs is converging on _ask and validate_, where after the initial generation, there is a back-and-forth with the model itself to correct the output according to spec. LLamaFlow abstracts away this entire process, and exposes a simple request & response API for the model where all responses are validated.
+LLamaFlow is the middleware layer that sits between your software and the AI model. The pattern for generating correct outputs from LLMs is converging on _ask and validate_, where after the initial generation, there is a back-and-forth with the model itself to correct the output according to spec. LLamaFlow abstracts away this entire process, and exposes a simple request & response API for the model where all responses are validated.
 
 Specifically, this package adds the following capabilities on top of the standard chat API:
 
