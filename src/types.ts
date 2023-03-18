@@ -24,7 +24,7 @@ export interface ChatConfig {
 }
 
 export interface Persona {
-  prompt: string;
+  prompt: string | (() => string);
   qualifiers?: string[];
   config?: Partial<ChatConfig> & Partial<ModelConfig>;
 }
