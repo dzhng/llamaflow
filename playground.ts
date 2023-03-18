@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { OpenAI, Persona, prompt } from 'index';
+import { OpenAI, Persona, prompt } from './src';
 
 async function go() {
   const llamaFlow = new OpenAI(

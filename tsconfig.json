@@ -25,7 +25,7 @@
     "baseUrl": "src",
     "outDir": "dist"
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "playground.ts"],
   "exclude": ["dist", "node_modules", "**/__mocks__/*"],
   "ts-node": {
     "compilerOptions": { "module": "commonjs" }
