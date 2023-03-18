@@ -5,8 +5,5 @@ export function buildMessage(persona: Persona): string {
     return persona.prompt;
   }
 
-  return `${persona.prompt.trim()}
-  
-  You will:
-  - ${persona.qualifiers.join('\n- ')}`;
+  return `${persona.prompt.trim()}\n\nYou will:\n- ${persona.qualifiers.join('\n- ')}`;
 }
