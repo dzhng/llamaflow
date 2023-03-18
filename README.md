@@ -1,6 +1,17 @@
 # LLamaFlow
 
-The Typescript first LLM prompt engineering toolkit for structured retrieval.
+The Typescript first prompt engineering toolkit for working with LLMs.
+
+- [Introduction](#introduction)
+- [Usage](#usage)
+  - [Install](#install)
+  - [Personas](#personas)
+  - [Prompts](#prompts)
+  - [Chats](#chats)
+  - [Custom Prompts](#custom-prompts)
+- [Debugging](#debugging)
+
+## Introduction
 
 LLamaFlow is meant to be the middleware layer that sits between your software and the AI model. The pattern for generating correct outputs from LLMs is converging on _ask and validate_, where after the initial generation, there is a back-and-forth with the model itself to correct the output according to spec. LLamaFlow abstracts away this entire process, and exposes a simple request & response API for the model where all responses are validated.
 
@@ -11,9 +22,28 @@ Specifically, this package adds the following capabilities on top of the standar
 - Schema definition, serialization / parsing, and **automatically asking the model to correct outputs**.
 - Handle rate limit and any other API errors as gracefully as possible (e.g. exponential backoff for rate-limit).
 
+Compared to other prompt engineering solutions, LLamaFlow differentiates by being chat native and structured output by default:
+
+- Everything is Typescript-first with responses fully validated & typed, works great with the excellent [zod](https://github.com/colinhacks/zod) package as a peer dep.
+- Chat based completion only - there are no plans to support traditional LLM completion. I believe chat inspired LLM APIs are what we'll converge to, due to having explicit separtion of system & user messages and being optimized for instruction based prompts.
+
 ## Usage
 
-### Initializing LLamaFlow
+### Install
+
+This package is hosted on npm:
+
+```
+npm i llama-flow
+```
+
+or
+
+```
+yarn add llama-flow
+```
+
+To setup in your codebase, initialize a new instance with the model you want (only `OpenAI` is suported for now).
 
 ```typescript
 import { OpenAI } from 'llama-flow';

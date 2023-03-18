@@ -48,6 +48,9 @@
     "openai": "^3.2.1",
     "zod": "^3.21.4"
   },
+  "peerDependencies": {
+    "zod": "^3.21.4"
+  },
   "devDependencies": {
     "@types/debug": "^4.1.7",
     "@types/jest": "^29.5.0",
