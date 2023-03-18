@@ -3,10 +3,7 @@ import { z } from 'zod';
 import { OpenAI, Persona, prompt } from './src';
 
 async function go() {
-  const llamaFlow = new OpenAI(
-    { apiKey: process.env.OPENAI_KEY ?? 'YOUR_OPENAI_KEY' },
-    { temperature: 0.7, maxTokens: 2048 },
-  );
+  const llamaFlow = new OpenAI({ apiKey: process.env.OPENAI_KEY ?? 'YOUR_OPENAI_KEY' });
 
   const writer: Persona = {
     prompt:
