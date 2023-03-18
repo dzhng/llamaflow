@@ -27,7 +27,7 @@ Specifically, this package adds the following capabilities on top of the standar
 Compared to other prompt engineering solutions, LLamaFlow differentiates by being chat native and structured output by default:
 
 - Everything is Typescript-first with responses fully validated & typed, works great with the excellent [zod](https://github.com/colinhacks/zod) package as a peer dep.
-- Chat based completion only - there are no plans to support traditional LLM completion. I believe chat inspired LLM APIs are what we'll converge to, due to having explicit separtion of system & user messages and being optimized for instruction based prompts.
+- Chat based completion only - there are no plans to support traditional LLM completion. I believe chat inspired LLM APIs are what all foundation models will converge to in the future, due to the steerability provided by having explicit separation of system & user prompts.
 
 ## Usage
 
