@@ -2,7 +2,7 @@
 
 [![test](https://github.com/dzhng/llamaflow/actions/workflows/test.yml/badge.svg?branch=main&event=push)](https://github.com/dzhng/llamaflow/actions/workflows/test.yml)
 
-The Typescript-first prompt engineering toolkit for working with chat based LLMs.
+The Typescript-first prompt engineering toolkit for working with chat based large language models (LLMs).
 
 - [Introduction](#introduction)
 - [Usage](#usage)
@@ -27,7 +27,7 @@ Specifically, this package adds the following capabilities on top of the standar
 Compared to other prompt engineering solutions, LLamaFlow differentiates by being chat native and structured output by default:
 
 - Everything is Typescript-first with responses fully validated & typed, works great with the excellent [zod](https://github.com/colinhacks/zod) package as a peer dep.
-- Chat based completion only - there are no plans to support traditional LLM completion. I believe chat inspired LLM APIs are what all foundation models will converge to in the future, due to the steerability provided by having explicit separation of system & user prompts.
+- Chat based completion only - there are no plans to support traditional LLM completion. I believe chat inspired LLM APIs are where all foundation models are converging to, due to the steerability provided by having explicit separation of system & user prompts.
 
 ## Usage
 
@@ -96,7 +96,7 @@ Note that the `Prompt` object seperates out the main `message`, and `formatMessa
 
 Bringing the concepts together.
 
-A chat is a conversation between the "user" (your software), and the AI agent (the Persona defined). LLamaFlow will take care of managing chat memory, including pruning the memory as needed in order to fit the context window. Note that different memory management strategies will be added in the future.
+A chat is a conversation between the "user" (your software), and the AI agent (the Persona defined). LLamaFlow will take care of managing chat memory, so you can simply continue the conversation by sending another request. Note that different memory management strategies will be added in the future, such as pruning the memory as needed in order to fit the context window.
 
 ```typescript
 // using the llamaFlow object and the writer persona that was initialized earlier
