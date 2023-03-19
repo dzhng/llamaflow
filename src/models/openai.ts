@@ -21,11 +21,10 @@ import { debug, sleep } from '../utils';
 
 import type { Model } from './interface';
 
-const DefaultModel = 'gpt-3.5-turbo';
+const Defaults: CreateChatCompletionRequest = { model: 'gpt-3.5-turbo', messages: [] };
 
-const convertConfig = (config: Partial<ModelConfig>): CreateChatCompletionRequest => ({
-  messages: [],
-  model: config.model ?? DefaultModel,
+const convertConfig = (config: Partial<ModelConfig>): Partial<CreateChatCompletionRequest> => ({
+  model: config.model,
   temperature: config.temperature,
   top_p: config.topP,
   n: 1,
@@ -60,7 +59,7 @@ export class OpenAI implements Model {
       ...opt
     } = {} as ChatRequestOptions,
   ): Promise<ChatResponse<string>> {
-    const finalConfig = defaults(convertConfig(config), convertConfig(this.defaults));
+    const finalConfig = defaults(convertConfig(config), convertConfig(this.defaults), Defaults);
     debug.log(`Sending request with ${retries} retries, config: ${JSON.stringify(finalConfig)}`);
     try {
       const completion = await this.openai.createChatCompletion(
