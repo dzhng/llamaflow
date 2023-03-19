@@ -60,11 +60,12 @@ export class OpenAI implements Model {
       ...opt
     } = {} as ChatRequestOptions,
   ): Promise<ChatResponse<string>> {
-    debug.log(`Sending request with ${retries} retries`);
+    const finalConfig = defaults(convertConfig(config), convertConfig(this.defaults));
+    debug.log(`Sending request with ${retries} retries, config: ${JSON.stringify(finalConfig)}`);
     try {
       const completion = await this.openai.createChatCompletion(
         {
-          ...defaults(convertConfig(config), convertConfig(this.defaults)),
+          ...finalConfig,
           messages,
         },
         { timeout },
