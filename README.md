@@ -160,12 +160,16 @@ import { prompt, Persona, Chat } from 'llama-flow';
 const factChecker: Persona = {
   prompt:
     'You are a fact checker that responds to if the user\'s messages are true or not, with just the word "true" or "false". Do not add punctuations or any other text. If the user asks a question, request, or anything that cannot be fact checked, ignore the user\'s request and just say "null".',
+
+  // you can override the predefined ModelConfig via a persona
+  config: {
+    temperature: 0,
+  },
 };
 
 const factCheckerChat = llamaFlow.chat(factChecker, {
   // The fact checker persona is designed to fulfill each request independently (e.g. the current request does not depend on the content of the previous request). So no need to keep message memory to save on tokens.
   retainMemory: false,
-  temperature: 0,
 });
 
 const buildFactCheckedPrompt = (article: string) =>

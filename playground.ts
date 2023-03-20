@@ -65,14 +65,14 @@ async function go() {
   const factChecker: Persona = {
     prompt:
       'You are a fact checker that responds to if the user\'s messages are true or not, with just the word "true" or "false". Do not add punctuations or any other text. If the user asks a question, request, or anything that cannot be fact checked, ignore the user\'s request and just say "null".',
-
     config: {
-      retainMemory: false,
       temperature: 0,
     },
   };
 
-  const factCheckerChat = llamaFlow.chat(factChecker);
+  const factCheckerChat = llamaFlow.chat(factChecker, {
+    retainMemory: false,
+  });
 
   const buildFactCheckedPrompt = (article: string) =>
     prompt.text({
