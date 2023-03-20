@@ -13,6 +13,7 @@ The Typescript-first prompt engineering toolkit for working with chat based larg
   - [Chats](#chats)
   - [Custom Prompts](#custom-prompts)
 - [Debugging](#-debugging)
+- [API Reference](#-api-reference)
 
 ## 👋 Introduction
 
@@ -159,17 +160,13 @@ import { prompt, Persona, Chat } from 'llama-flow';
 const factChecker: Persona = {
   prompt:
     'You are a fact checker that responds to if the user\'s messages are true or not, with just the word "true" or "false". Do not add punctuations or any other text. If the user asks a question, request, or anything that cannot be fact checked, ignore the user\'s request and just say "null".',
-
-  // Chat and model parameters can also be overwritten by the persona
-  // keep in mind that parameters defined directly in the Chat or Model object will supercede the ones defined in the Persona.
-  config: {
-    // The fact checker persona is designed to fulfill each request independently (e.g. the current request does not depend on the content of the previous request). So no need to keep message memory to save on tokens.
-    retainMemory: false,
-    temperature: 0,
-  },
 };
 
-const factCheckerChat = llamaFlow.chat(factChecker);
+const factCheckerChat = llamaFlow.chat(factChecker, {
+  // The fact checker persona is designed to fulfill each request independently (e.g. the current request does not depend on the content of the previous request). So no need to keep message memory to save on tokens.
+  retainMemory: false,
+  temperature: 0,
+});
 
 const buildFactCheckedPrompt = (article: string) =>
   prompt.text({
@@ -242,3 +239,244 @@ You can also specify errors or logs only:
 
 `DEBUG=llamaflow:error yarn playground`
 `DEBUG=llamaflow:log yarn playground`
+
+## ✅ API Reference
+
+### Model
+
+The only model LLamaFlow supports currently is OpenAI's chat based models.
+
+```typescript
+const model = new OpenAI(openAiConfig, modelConfig);
+```
+
+#### OpenAI Config
+
+```typescript
+interface OpenAIConfig {
+  apiKey: string;
+}
+```
+
+#### Model Config
+
+These model config map to OpenAI's config directly, see doc:
+https://platform.openai.com/docs/api-reference/chat/create
+
+```typescript
+interface ModelConfig {
+  model?: string;
+  maxTokens?: number;
+  temperature?: number;
+  topP?: number;
+  stop?: string | string[];
+  presencePenalty?: number;
+  frequencyPenalty?: number;
+  logitBias?: Record<string, number>;
+  user?: string;
+}
+```
+
+### Persona
+
+```typescript
+interface Persona {
+  prompt: string | (() => string);
+  qualifiers?: string[];
+  config?: Partial<ModelConfig>;
+}
+
+const assistant: Persona = {
+  prompt: 'You are a helpful AI assistant',
+};
+```
+
+**prompt**
+The system prompt used to start the chat.
+
+**qualifiers**
+An array of additional prompt to append to the system prompt. Any qualifiers will be appended to the system prompt in a bullet point format.
+
+**config**
+Same as `ModelConfig` above, you can override model options on a per-chat basis.
+
+### Prompt
+
+To make a request to the model, you need to first build the prompt object. prompts provide a way to add validation and retry logic to each request.
+
+```typescript
+import { prompt } from 'llama-flow';
+
+prompt.text(prompt: string);
+prompt.text(prompt: RawPrompt);
+
+prompt.json(prompt: JSONPrompt);
+prompt.bulletPoints(prompt: BulletPointsPrompt);
+prompt.boolean(prompt: BooleanPrompt);
+```
+
+#### Text
+
+You can either request as a string, or as a `RawPrompt`.
+
+```typescript
+interface RawPrompt<T = string> {
+  message: string;
+  parse?: (
+    response: ChatResponse<string>,
+  ) => MaybePromise<{ success: false; retryPrompt?: string } | { success: true; data: T }>;
+  promptRetries?: number;
+}
+```
+
+**message**
+This is the text that is sent to the model.
+
+**parse**
+You can implement a custom parser by defining a your own `parse` method.
+
+When defining a custom `parse` method that returns a custom data type, you can add a generic type to `RawPrompt`, which will automatically cast the return type of `parse` to the generic. It will also propagate the type all the way through the `chat.request` method.
+
+If the data returned by the model is malformed, you can return a custom `retryPrompt` string, which will cause LLamaFlow to reask the model.
+
+**promptRetries**
+Defines how many times to reask the model before the request will throw an error. Defaults to 3. Note that `parse` has to return a valid `retryPrompt` for any retries to be attempted.
+
+#### Boolean
+
+```typescript
+interface BooleanPrompt {
+  message: string;
+  promptRetries?: number;
+}
+```
+
+Use this prompt if you want to ask the model a question where you only expect a `true` or `false` response.
+
+**message**
+The query to send to the model. This prompt will automatically append formatting instructions to the message that is sent to the model that tells the model to format its response as a boolean, so you can just include the query in `message`, without writing any additional formatting statements.
+
+#### Bullet
+
+```typescript
+interface BulletPointsPrompt {
+  message: string;
+  amount?: number;
+  length?: number;
+  promptRetries?: number;
+}
+```
+
+Use this prompt if you want the model to return a list of strings.
+
+**message**
+The query to send to the model. This prompt will automatically append formatting instructions to the message that tells the model how to format the response.
+
+**amount**
+The number of bullet points that should be returned.
+
+**length**
+The maximum number of characters that should be in each bullet point.
+
+#### JSON
+
+```typescript
+interface JSONPrompt<T extends z.ZodType> {
+  message: string;
+  schema: T;
+  parseResponse?: (res: string) => MaybePromise<z.infer<T>>;
+  retryMessage?: string;
+  promptRetries?: number;
+}
+```
+
+**message**
+The message to send to the model. Unlike boolean or bullet point prompts, this prompt does not automatically generate formating instructions for the model. So as part of your message to the model, you should include formatting instructions to return data in JSON format, as well as the shape of the JSON.
+
+**schema**
+This is the [zod](https://github.com/colinhacks/zod) schema that will be used to parse and typecast the response from the model.
+
+**parseResponse**
+If you ask the model to _not_ return data in JSON format, you can define a custom parser to parse the return string into JSON, before sending it for to `schema` for validation.
+
+**retryMessage**
+If schema parsing fails, this will be used as part of the message sent to the model to reask for a correctly formatted response. Note that this prompt will automatically generate the reask message depending on schema parsing errors (e.g. if a specific key is missing, LLamaFlow will ask the model to include that specific key). So this field is purely to give additional context to the model on reask.
+
+### Chat
+
+The chat object stores a chat session with the model. The session will take care of storing message history, so you can simply continue the conversation with the model by making another request.
+
+```typescript
+const chat = model.chat(persona: Persona);
+```
+
+#### Request
+
+To send a request to a chat session:
+
+```typescript
+const res: ChatResponse = await chat.request(prompt, options: ChatRequestOptions);
+```
+
+**options**
+You can override the default request options via this parameter. A request will automatically be retried if there is a ratelimit or server error.
+
+Note that a retry in the request does not count towards a prompt reask defined in the Prompt section above.
+
+```typescript
+type ChatRequestOptions = {
+  // the number of time to retry this request due to rate limit or recoverable API errors
+  retries?: number;
+  retryInterval?: number;
+  timeout?: number;
+
+  // override the messages used for completion, only use this if you understand the API well
+  messages?: Message[];
+};
+```
+
+#### Response
+
+Chat responses are in the following format:
+
+```typescript
+interface ChatResponse<T = string> {
+  content: T;
+  model: string;
+  usage: {
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
+  };
+}
+```
+
+**content**
+Parsed and typecasted content from the prompt. The types will be set automatically depending on which prompt you used.
+
+**model**
+The specific model used for the completion (e.g. `gpt-3.5-turbo-0301`)
+
+**usage**
+Token usage data, this maps directly OpenAI's usage response.
+
+#### Reset
+
+If you would like to reset the message history in a chat history, there is a simple helper method:
+
+```typescript
+chat.reset();
+```
+
+Note that this method is an escape hatch. It's better to just instantiate a new chat session if you'd like to make a new request with a clean slate. Complex logic where you are resetting a chat session multiple times can be hard to track and hard to debug.
+
+### Misc
+
+Note that if you want to bypass LLamaFlow's chat management logic, and send a request to the underlaying model directly, you can send a request to the model directly without instantiating a chat:
+
+```typescript
+const model = new OpenAI(openAiConfig, modelConfig);
+const res = await model.request(messages: Message[], options: ChatRequestOptions);
+```
+
+This will bypass any chat history management, prompt formatting & parsing, as well as persona logic. You can still make use of the API retries feature via `ChatRequestOptions`.

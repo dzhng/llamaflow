@@ -26,11 +26,11 @@ export interface ChatConfig {
 export interface Persona {
   prompt: string | (() => string);
   qualifiers?: string[];
-  config?: Partial<ChatConfig> & Partial<ModelConfig>;
+  config?: Partial<ModelConfig>;
 }
 
 export type ChatRequestOptions = {
-  // the number of time to retry this request due to rate limit or retriable API errors
+  // the number of time to retry this request due to rate limit or recoverable API errors
   retries?: number;
   retryInterval?: number;
   timeout?: number;
@@ -58,9 +58,9 @@ export interface Message {
 
 export interface JSONPrompt<T extends z.ZodType> {
   message: string;
-  retryMessage?: string;
-  parseResponse?: (res: string) => MaybePromise<z.infer<T>>;
   schema: T;
+  parseResponse?: (res: string) => MaybePromise<z.infer<T>>;
+  retryMessage?: string;
   promptRetries?: number;
 }
 
