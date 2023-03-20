@@ -3,7 +3,26 @@ import { z } from 'zod';
 import { OpenAI, Persona, prompt } from './src';
 
 async function go() {
-  const llamaFlow = new OpenAI({ apiKey: process.env.OPENAI_KEY ?? 'YOUR_OPENAI_KEY' });
+  const model = new OpenAI({ apiKey: process.env.OPENAI_KEY ?? 'YOUR_OPENAI_KEY' });
+
+  const assistant: Persona = {
+    prompt: 'You are a smart and honest AI assistant',
+    qualifiers: [
+      "Follow the user's requirements carefully & to the letter",
+      'Minimize any other prose',
+    ],
+  };
+
+  const chat2 = model.chat(assistant);
+  const response2 = await chat2.request(
+    prompt.json({
+      message:
+        'What are some good names for childrens book about the renaissance? Respond as a JSON array',
+      schema: z.array(z.string().max(200)),
+    }),
+  );
+
+  console.info(response2.content); // content will be typed as string[];
 
   const writer: Persona = {
     prompt:
@@ -16,7 +35,7 @@ async function go() {
     ],
   };
 
-  const chat = llamaFlow.chat(writer, {
+  const chat = model.chat(writer, {
     retainMemory: true,
   });
 
@@ -70,7 +89,7 @@ async function go() {
     },
   };
 
-  const factCheckerChat = llamaFlow.chat(factChecker, {
+  const factCheckerChat = model.chat(factChecker, {
     retainMemory: false,
   });
 

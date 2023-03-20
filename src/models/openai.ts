@@ -99,6 +99,7 @@ export class OpenAI implements Model {
       if (
         error.code === 'ETIMEDOUT' ||
         error.code === 'ECONNABORTED' ||
+        error.code === 'ECONNRESET' ||
         (error.response && (error.response.status === 429 || error.response.status >= 500))
       ) {
         debug.log(`Completion rate limited, retrying... attempts left: ${retries}`);

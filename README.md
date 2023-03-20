@@ -26,6 +26,32 @@ Specifically, this package adds the following capabilities on top of the standar
 - Custom content validation hook that allows you to add your own valider for all model outputs, including logic on how to reask the model.
 - Handle rate limit and any other API errors as gracefully as possible (e.g. exponential backoff for rate-limit).
 
+With LLamaFlow, you can simply query OpenAI's ChatGPT model like so:
+
+```typescript
+import { OpenAI } from 'llama-flow';
+
+const model = new OpenAI({ apiKey: 'YOUR_OPENAI_KEY' });
+const assistant: Persona = {
+  prompt: 'You are a smart and honest AI assistant',
+  qualifiers: [
+    "Follow the user's requirements carefully & to the letter",
+    'Minimize any other prose',
+  ],
+};
+
+const chat = model.chat(assistant);
+const response = await chat.request(
+  prompt.json({
+    message:
+      'What are some good names for childrens book about the renaissance? Respond as a JSON array',
+    schema: z.array(z.string().max(200)),
+  }),
+);
+
+console.log(response.content); // content will be typed as string[];
+```
+
 ## 🤔 Why LLamaFlow
 
 There are a few other prompt engineering libraries for typescript / javascript, most notiably [Langchain](https://github.com/hwchase17/langchainjs). Compared to other solutions, LLamaFlow differentiates by being chat-first, and supports structured, _fully typed_ outputs by default. LLamaFlow also focuses purely on interacting with the model - it doesn't have the complexity of managing multiple types of chains / agents / memory, which should hopefully make for a much simpler & more extensible API. If you need memory or agent capabilities, you will have to build it yourself, as it does not come out of the box. (or use it together with Langchain, they can complement each other well.)
@@ -35,7 +61,7 @@ TLDR:
 - Everything is Typescript-first with responses fully validated & typed, works great with the excellent [zod](https://github.com/colinhacks/zod) package as a peer dep.
 - Chat based completion only - there are no plans to support traditional LLM completion. I believe chat inspired LLM APIs are where all foundation models are converging to, due to the steerability provided by having explicit separation of system & user prompts.
 
-If you are wondering why the name LLamaFlow - 🦙 LLama is a play on LLM.
+If you are wondering why the name LLamaFlow - 🦙 LLama is a play on LLM, inspired by the excellent [LlamaIndex](https://github.com/jerryjliu/llama_index).
 
 ## 🔨 Usage
 
@@ -47,8 +73,6 @@ This package is hosted on npm:
 npm i llama-flow
 ```
 
-or
-
 ```
 yarn add llama-flow
 ```
@@ -58,7 +82,7 @@ To setup in your codebase, initialize a new instance with the model you want (on
 ```typescript
 import { OpenAI } from 'llama-flow';
 
-const llamaFlow = new OpenAI({ apiKey: 'YOUR_OPENAI_KEY' });
+const model = new OpenAI({ apiKey: 'YOUR_OPENAI_KEY' });
 ```
 
 ### Personas
@@ -106,8 +130,8 @@ Bringing the concepts together.
 A chat is a conversation between the "user" (your software), and the AI agent (the Persona defined). LLamaFlow will take care of managing chat memory, so you can simply continue the conversation by sending another request. Note that different memory management strategies will be added in the future, such as pruning the memory as needed in order to fit the context window.
 
 ```typescript
-// using the llamaFlow object and the writer persona that was initialized earlier
-const chat = llamaFlow.chat(writer);
+// using the model object and the writer persona that was initialized earlier
+const chat = model.chat(writer);
 
 // You can ask the AI model with a simple string, or a dedicated `Prompt` object.
 const response = await chat.request(
@@ -167,7 +191,7 @@ const factChecker: Persona = {
   },
 };
 
-const factCheckerChat = llamaFlow.chat(factChecker, {
+const factCheckerChat = model.chat(factChecker, {
   // The fact checker persona is designed to fulfill each request independently (e.g. the current request does not depend on the content of the previous request). So no need to keep message memory to save on tokens.
   retainMemory: false,
 });

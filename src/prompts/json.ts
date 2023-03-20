@@ -42,7 +42,9 @@ export default function buildRawPrompt<T extends z.ZodType>(
           const issuesMessage = parsed.error.issues.reduce(
             (prev, issue) =>
               issue.path && issue.path.length > 0
-                ? `${prev}\nThere is an issue with the the value "${get(json, issue.path)}", at ${
+                ? `${prev}\nThere is an issue with the the value "${JSON.stringify(
+                    get(json, issue.path),
+                  )}", at ${
                     isArray ? `index ${issue.path[0]}` : `path ${issue.path.join('.')}`
                   }. The issue is: ${issue.message}`
                 : `\nThe issue is: ${issue.message}`,
