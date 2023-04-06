@@ -36,12 +36,12 @@ const convertConfig = (config: Partial<ModelConfig>): Partial<CreateChatCompleti
 });
 
 export class OpenAI implements Model {
-  private openai: OpenAIApi;
+  public _model: OpenAIApi;
   private defaults: ModelConfig;
 
   constructor(config: OpenAIConfig, defaults?: ModelConfig) {
     const configuration = new Configuration({ apiKey: config.apiKey });
-    this.openai = new OpenAIApi(configuration);
+    this._model = new OpenAIApi(configuration);
     this.defaults = defaults ?? {};
   }
 
@@ -62,7 +62,7 @@ export class OpenAI implements Model {
     const finalConfig = defaults(convertConfig(config), convertConfig(this.defaults), Defaults);
     debug.log(`Sending request with ${retries} retries, config: ${JSON.stringify(finalConfig)}`);
     try {
-      const completion = await this.openai.createChatCompletion(
+      const completion = await this._model.createChatCompletion(
         {
           ...finalConfig,
           messages,
