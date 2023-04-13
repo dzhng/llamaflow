@@ -54,7 +54,7 @@ console.log(response.content); // content will be typed as string[];
 
 ## 🤔 Why LLamaFlow
 
-There are a few other prompt engineering libraries for typescript / javascript, most notiably [Langchain](https://github.com/hwchase17/langchainjs). Compared to other solutions, LLamaFlow differentiates by being chat-first, and supports structured, _fully typed_ outputs by default. LLamaFlow also focuses purely on interacting with the model - it doesn't have the complexity of managing multiple types of chains / agents / memory, which should hopefully make for a much simpler & more extensible API. If you need memory or agent capabilities, you will have to build it yourself, as it does not come out of the box. (or use it together with Langchain, they can complement each other well.)
+There are a few other prompt engineering libraries for typescript / javascript, most notably [Langchain](https://github.com/hwchase17/langchainjs). Compared to other solutions, LLamaFlow differentiates by being chat-first, and supports structured, _fully typed_ outputs by default. LLamaFlow also focuses purely on interacting with the model - it doesn't have the complexity of managing multiple types of chains / agents / memory, which should hopefully make for a much simpler & more extensible API. If you need memory or agent capabilities, you will have to build it yourself, as it does not come out of the box. (or use it together with Langchain, they can complement each other well.)
 
 TLDR:
 
