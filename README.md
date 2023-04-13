@@ -187,6 +187,7 @@ const factChecker: Persona = {
 
   // you can override the predefined ModelConfig via a persona
   config: {
+    model: 'gpt-4',
     temperature: 0,
   },
 };
