@@ -1,3 +1,5 @@
+import { defaults } from 'lodash';
+
 import { PromptDefaultRetries } from './config';
 import { Model } from './models/interface';
 import { buildMessage } from './persona';
@@ -35,7 +37,9 @@ export class Chat {
         content: prompt.message,
       },
     ];
-    const response = await this.model.request(newMessages, this.persona.config, opt);
+
+    const mergedOpt = defaults(opt, this.config.options);
+    const response = await this.model.request(newMessages, this.persona.config, mergedOpt);
     if (!response) {
       throw new Error('Chat request failed');
     }
