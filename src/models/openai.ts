@@ -38,15 +38,18 @@ const convertConfig = (config: Partial<ModelConfig>): Partial<CreateChatCompleti
 export class OpenAI implements Model {
   public _model: OpenAIApi;
   private defaults: ModelConfig;
+  private config: ChatConfig;
 
-  constructor(config: OpenAIConfig, defaults?: ModelConfig) {
+  constructor(config: OpenAIConfig, defaults?: ModelConfig, chatConfig?: ChatConfig) {
     const configuration = new Configuration({ apiKey: config.apiKey });
     this._model = new OpenAIApi(configuration);
     this.defaults = defaults ?? {};
+    this.config = chatConfig ?? {};
   }
 
   chat(persona: Persona, config?: ChatConfig) {
-    return new Chat(persona, config ?? {}, this);
+    const finalConfig = defaults(config, this.config);
+    return new Chat(persona, finalConfig ?? {}, this);
   }
 
   async request(

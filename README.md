@@ -77,12 +77,16 @@ npm i llama-flow
 yarn add llama-flow
 ```
 
-To setup in your codebase, initialize a new instance with the model you want (only `OpenAI` is suported for now).
+To setup in your codebase, initialize a new instance with the model you want (only `OpenAI` is suported for now). Note that you can also add default model and chat config (like temperature, timeouts, retries) when initializing. These are just defaults, and can always be overwritten later on a per-chat or per-request basis.
 
 ```typescript
 import { OpenAI } from 'llama-flow';
 
-const model = new OpenAI({ apiKey: 'YOUR_OPENAI_KEY' });
+const model = new OpenAI(
+  { apiKey: 'YOUR_OPENAI_KEY' },
+  { model: 'gpt-3.5-turbo' },
+  { retainMemory: true },
+);
 ```
 
 ### Personas

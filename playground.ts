@@ -149,6 +149,14 @@ async function go() {
   );
 
   console.info('Chat flow example:', article, entities, titles);
+
+  const model2 = new OpenAI(
+    { apiKey: process.env.OPENAI_KEY ?? 'YOUR_OPENAI_KEY' },
+    { temperature: 0.2 },
+    { retainMemory: true },
+  );
+
+  console.info('New model with custom defaults', model2);
 }
 
 go();
