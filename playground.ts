@@ -3,7 +3,10 @@ import { z } from 'zod';
 import { OpenAI, Persona, prompt } from './src';
 
 async function go() {
-  const model = new OpenAI({ apiKey: process.env.OPENAI_KEY ?? 'YOUR_OPENAI_KEY' });
+  const model = new OpenAI(
+    { apiKey: process.env.OPENAI_KEY ?? 'YOUR_OPENAI_KEY' },
+    { stream: true },
+  );
   console.info('Model created', model);
 
   const assistant: Persona = {
