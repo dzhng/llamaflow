@@ -44,7 +44,9 @@ export class Chat {
       throw new Error('Chat request failed');
     }
 
-    debug.log('⬇️ received response:', response.content);
+    // only send this debug msg when stream is not enabled, or there'll be duplicate log msgs since stream also streams in the logs
+    !response.isStream && debug.log('⬇️ received response:', response.content);
+
     const messagesWithResponse: Message[] = [
       ...newMessages,
       {

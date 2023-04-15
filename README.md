@@ -268,7 +268,6 @@ You can also specify different logging types via:
 
 `DEBUG=llamaflow:error yarn playground`
 `DEBUG=llamaflow:log yarn playground`
-`DEBUG=llamaflow:stream yarn playground`
 
 ## ✅ API Reference
 
@@ -492,6 +491,10 @@ Chat responses are in the following format:
 interface ChatResponse<T = string> {
   content: T;
   model: string;
+
+  // set to true if this content was streamed. note to actually access the stream, you have to pass in an event emitter via ChatRequestOptions
+  isStream: boolean;
+
   usage: {
     promptTokens: number;
     completionTokens: number;

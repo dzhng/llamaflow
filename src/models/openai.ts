@@ -41,9 +41,9 @@ const convertConfig = (config: Partial<ModelConfig>): Partial<CreateChatCompleti
 });
 
 export class OpenAI implements Model {
-  public _model: OpenAIApi;
-  private defaults: ModelConfig;
-  private config: ChatConfig;
+  _model: OpenAIApi;
+  defaults: ModelConfig;
+  config: ChatConfig;
 
   constructor(config: OpenAIConfig, defaults?: ModelConfig, chatConfig?: ChatConfig) {
     const configuration = new Configuration({ apiKey: config.apiKey });
@@ -125,6 +125,7 @@ export class OpenAI implements Model {
       return {
         content,
         model: completion.data.model,
+        isStream: Boolean(finalConfig.stream),
         usage: usage
           ? {
               totalTokens: usage.total_tokens,

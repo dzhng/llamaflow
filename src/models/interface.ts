@@ -1,6 +1,9 @@
-import { ChatRequestOptions, ChatResponse, Message, ModelConfig } from '../types';
+import { ChatConfig, ChatRequestOptions, ChatResponse, Message, ModelConfig } from '../types';
 
 export interface Model {
+  defaults: ModelConfig;
+  config: ChatConfig;
+
   request(
     messages: Message[],
     config?: Partial<ModelConfig>,
