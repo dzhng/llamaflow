@@ -21,7 +21,10 @@ export interface ModelConfig {
 }
 
 export interface ChatConfig {
+  // if chat memory should be retained after every request. when enabled, the chat's behavior will be similar to a normal user chat room, and model can have access to history when making inferences. defaults to false
   retainMemory?: boolean;
+
+  // set default request options. note that this can be overridden on a per-request basis
   options?: ChatRequestOptions;
 }
 

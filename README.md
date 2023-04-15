@@ -82,11 +82,7 @@ To setup in your codebase, initialize a new instance with the model you want (on
 ```typescript
 import { OpenAI } from 'llama-flow';
 
-const model = new OpenAI(
-  { apiKey: 'YOUR_OPENAI_KEY' },
-  { model: 'gpt-3.5-turbo' },
-  { retainMemory: true },
-);
+const model = new OpenAI({ apiKey: 'YOUR_OPENAI_KEY' }, { model: 'gpt-3.5-turbo' });
 ```
 
 ### Personas
@@ -135,7 +131,7 @@ A chat is a conversation between the "user" (your software), and the AI agent (t
 
 ```typescript
 // using the model object and the writer persona that was initialized earlier
-const chat = model.chat(writer);
+const chat = model.chat(writer, { retainMemory: true });
 
 // You can ask the AI model with a simple string, or a dedicated `Prompt` object.
 const response = await chat.request(
@@ -268,10 +264,11 @@ LLamaFlow usese the `debug` module for logging & error messages. To run in debug
 
 `DEBUG=llamaflow:* yarn playground`
 
-You can also specify errors or logs only:
+You can also specify different logging types via:
 
 `DEBUG=llamaflow:error yarn playground`
 `DEBUG=llamaflow:log yarn playground`
+`DEBUG=llamaflow:stream yarn playground`
 
 ## ✅ API Reference
 
@@ -307,8 +304,11 @@ interface ModelConfig {
   frequencyPenalty?: number;
   logitBias?: Record<string, number>;
   user?: string;
+  stream?: boolean;
 }
 ```
+
+When `stream` is set to `true`, you can access partial outputs of the model's requests by passing in an event emitter to `ChatRequestOptions` when making requests. The partial outputs will be sent as a string over the `data` event.
 
 ### Persona
 
@@ -440,7 +440,20 @@ If schema parsing fails, this will be used as part of the message sent to the mo
 The chat object stores a chat session with the model. The session will take care of storing message history, so you can simply continue the conversation with the model by making another request.
 
 ```typescript
-const chat = model.chat(persona: Persona);
+const chat = model.chat(persona: Persona, config: ChatConfig);
+```
+
+**options**
+You can set the memory retention behavior as well as the default request options for every request sent in this chat.
+
+```typescript
+export interface ChatConfig {
+  // if chat memory should be retained after every request. when enabled, the chat's behavior will be similar to a normal user chat room, and model can have access to history when making inferences. defaults to false
+  retainMemory?: boolean;
+
+  // set default request options. note that this can be overridden on a per-request basis
+  options?: ChatRequestOptions;
+}
 ```
 
 #### Request
@@ -465,6 +478,9 @@ type ChatRequestOptions = {
 
   // override the messages used for completion, only use this if you understand the API well
   messages?: Message[];
+
+  // pass in an event emitter to receive message stream events
+  events?: EventEmitter;
 };
 ```
 
