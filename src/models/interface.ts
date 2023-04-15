@@ -9,4 +9,6 @@ export interface Model {
     config?: Partial<ModelConfig>,
     opt?: ChatRequestOptions,
   ): Promise<ChatResponse<string>>;
+
+  getTokensFromMessages(messages: Message[]): number;
 }

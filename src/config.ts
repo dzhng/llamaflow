@@ -2,6 +2,7 @@
 export const RateLimitRetryIntervalMs = 30_000;
 export const CompletionDefaultRetries = 3;
 export const CompletionDefaultTimeout = 30_000;
+export const MinimumResponseTokens = 200;
 
 // prompting
 export const PromptDefaultRetries = 3;

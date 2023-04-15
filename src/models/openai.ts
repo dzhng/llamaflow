@@ -3,11 +3,13 @@ import jsonic from 'jsonic';
 import { defaults } from 'lodash';
 import { Configuration, CreateChatCompletionRequest, OpenAIApi } from 'openai';
 import { Readable } from 'stream';
+import tiktoken from 'tiktoken-node';
 
 import { Chat } from '../chat';
 import {
   CompletionDefaultRetries,
   CompletionDefaultTimeout,
+  MinimumResponseTokens,
   RateLimitRetryIntervalMs,
 } from '../config';
 import type {
@@ -21,11 +23,15 @@ import type {
 } from '../types';
 import { debug, sleep } from '../utils';
 
+import { TokenError } from './errors';
 import type { Model } from './interface';
 
 interface CreateChatCompletionResponse extends Readable {}
 
 const Defaults: CreateChatCompletionRequest = { model: 'gpt-3.5-turbo', messages: [] };
+
+const getTokenLimit = (model: string) => (model === 'gpt-4' ? 8000 : 4096);
+const encoder = tiktoken.getEncoding('cl100k_base');
 
 const convertConfig = (config: Partial<ModelConfig>): Partial<CreateChatCompletionRequest> => ({
   model: config.model,
@@ -57,6 +63,16 @@ export class OpenAI implements Model {
     return new Chat(persona, finalConfig ?? {}, this);
   }
 
+  getTokensFromMessages(messages: Message[]) {
+    let numTokens = 0;
+    for (const message of messages) {
+      numTokens += 5; // every message follows <im_start>{role/name}\n{content}<im_end>\n
+      numTokens += encoder.encode(message.content).length;
+    }
+    numTokens += 2; // every reply is primed with <im_start>assistant\n
+    return numTokens;
+  }
+
   async request(
     messages: Message[],
     config = {} as Partial<ModelConfig>,
@@ -64,12 +80,23 @@ export class OpenAI implements Model {
       retries = CompletionDefaultRetries,
       retryInterval = RateLimitRetryIntervalMs,
       timeout = CompletionDefaultTimeout,
+      minimumResponseTokens = MinimumResponseTokens,
       events,
     } = {} as ChatRequestOptions,
   ): Promise<ChatResponse<string>> {
     const finalConfig = defaults(convertConfig(config), convertConfig(this.defaults), Defaults);
     debug.log(`Sending request with ${retries} retries, config: ${JSON.stringify(finalConfig)}`);
     try {
+      // check if we'll have enough tokens to meet the minimum response
+      const maxPromptTokens = getTokenLimit(finalConfig.model) - minimumResponseTokens;
+      const messageTokens = this.getTokensFromMessages(messages);
+      if (messageTokens > maxPromptTokens) {
+        throw new TokenError(
+          'Prompt too big, not enough tokens to meet minimum response',
+          messageTokens - maxPromptTokens,
+        );
+      }
+
       const completion = await this._model.createChatCompletion(
         {
           ...finalConfig,

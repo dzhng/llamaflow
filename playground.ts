@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { OpenAI, Persona, prompt, ModelConfig } from './src';
+import { ModelConfig, OpenAI, Persona, prompt, TokenError } from './src';
 
 async function benchmark(opt: ModelConfig) {
   const model = new OpenAI({ apiKey: process.env.OPENAI_KEY ?? 'YOUR_OPENAI_KEY' }, opt);
@@ -14,6 +14,21 @@ async function benchmark(opt: ModelConfig) {
     ],
   };
 
+  try {
+    const chat3 = model.chat({
+      prompt: 'You are an AI assistant',
+      config: { model: 'gpt-3.5-turbo' },
+    });
+    await chat3.request(
+      { message: 'hello world, testing overflow logic' },
+      { minimumResponseTokens: 4095 },
+    );
+  } catch (e) {
+    if (e instanceof TokenError) {
+      console.info(`Caught token overflow, overflowed tokens: ${e.overflowTokens}`);
+    }
+  }
+
   const chat2 = model.chat(assistant);
   const response2 = await chat2.request(
     prompt.json({
@@ -22,7 +37,6 @@ async function benchmark(opt: ModelConfig) {
       schema: z.array(z.string().max(200)),
     }),
   );
-
   console.info(response2.content); // content will be typed as string[];
 
   const writer: Persona = {
