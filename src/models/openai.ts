@@ -88,7 +88,7 @@ export class OpenAI implements Model {
         content = await new Promise<string>((resolve, reject) => {
           let res = '';
           response.on('data', (message: Buffer) => {
-            const stringfied = message.toString('ascii').split('\n');
+            const stringfied = message.toString('utf8').split('\n');
             for (const line of stringfied) {
               try {
                 const cleaned = line.replace('data:', '').trim();
@@ -103,7 +103,7 @@ export class OpenAI implements Model {
                 events?.emit('data', text);
                 res += text;
               } catch (e) {
-                debug.error('Error parsing content:', message.toString('ascii'), e);
+                debug.error('Error parsing content:', message.toString('utf8'), e);
               }
             }
           });

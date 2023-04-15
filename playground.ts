@@ -1,12 +1,9 @@
 import { z } from 'zod';
 
-import { OpenAI, Persona, prompt } from './src';
+import { OpenAI, Persona, prompt, ModelConfig } from './src';
 
-async function go() {
-  const model = new OpenAI(
-    { apiKey: process.env.OPENAI_KEY ?? 'YOUR_OPENAI_KEY' },
-    { stream: true },
-  );
+async function benchmark(opt: ModelConfig) {
+  const model = new OpenAI({ apiKey: process.env.OPENAI_KEY ?? 'YOUR_OPENAI_KEY' }, opt);
   console.info('Model created', model);
 
   const assistant: Persona = {
@@ -163,4 +160,17 @@ async function go() {
   console.info('New model with custom defaults', model2);
 }
 
-go();
+(async function go() {
+  const streamTrueStart = Date.now();
+  await benchmark({ stream: true });
+  const streamTrueTime = Date.now() - streamTrueStart;
+
+  const streamFalseStart = Date.now();
+  await benchmark({ stream: false });
+  const streamFalseTime = Date.now() - streamFalseStart;
+
+  console.info('--- BENCHMARK RESULTS ---');
+  console.info(`{stream: true} : ${streamTrueTime / 1000} seconds`);
+  console.info(`{stream: false} : ${streamFalseTime / 1000} seconds`);
+  console.info('--- END BENCHMARK ---');
+})();
