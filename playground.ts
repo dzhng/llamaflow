@@ -54,7 +54,7 @@ async function go() {
 
   // The results, as well as any usage stats, will be returned.
   console.info(
-    `The AI writer's response is: ${response.content}. Token used: ${response.usage.totalTokens}.`,
+    `The AI writer's response is: ${response.content}. Token used: ${response.usage?.totalTokens}.`,
   );
 
   const bulletPoints = await chat.request(bulletPrompt);
@@ -84,7 +84,7 @@ async function go() {
 
   const factChecker: Persona = {
     prompt:
-      'You are a fact checker that responds to if the user\'s messages are true or not, with just the word "true" or "false". Do not add punctuations or any other text. If the user asks a question, request, or anything that cannot be fact checked, ignore the user\'s request and just say "null".',
+      'You are a fact checker that responds to if the user\'s messages are true or not, with just the word "true" or "false". Do not add punctuations or any other text. If the user asks a question, request, or anything that cannot be fact checked, ignore the user\'s request and just say "false".',
     config: {
       model: 'gpt-4',
       temperature: 0,

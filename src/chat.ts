@@ -79,7 +79,7 @@ export class Chat {
               message: res.retryPrompt,
               promptRetries: promptRetries - 1,
             },
-            { messages: messagesWithResponse },
+            { ...opt, messages: messagesWithResponse },
           );
         } else {
           throw new Error('Response parsing failed');

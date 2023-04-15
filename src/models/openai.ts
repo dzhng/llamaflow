@@ -1,6 +1,8 @@
 import { isAxiosError } from 'axios';
+import jsonic from 'jsonic';
 import { defaults } from 'lodash';
 import { Configuration, CreateChatCompletionRequest, OpenAIApi } from 'openai';
+import { Readable } from 'stream';
 
 import { Chat } from '../chat';
 import {
@@ -21,6 +23,8 @@ import { debug, sleep } from '../utils';
 
 import type { Model } from './interface';
 
+interface CreateChatCompletionResponse extends Readable {}
+
 const Defaults: CreateChatCompletionRequest = { model: 'gpt-3.5-turbo', messages: [] };
 
 const convertConfig = (config: Partial<ModelConfig>): Partial<CreateChatCompletionRequest> => ({
@@ -33,6 +37,7 @@ const convertConfig = (config: Partial<ModelConfig>): Partial<CreateChatCompleti
   frequency_penalty: config.frequencyPenalty,
   logit_bias: config.logitBias,
   user: config.user,
+  stream: config.stream,
 });
 
 export class OpenAI implements Model {
@@ -59,7 +64,7 @@ export class OpenAI implements Model {
       retries = CompletionDefaultRetries,
       retryInterval = RateLimitRetryIntervalMs,
       timeout = CompletionDefaultTimeout,
-      ...opt
+      events,
     } = {} as ChatRequestOptions,
   ): Promise<ChatResponse<string>> {
     const finalConfig = defaults(convertConfig(config), convertConfig(this.defaults), Defaults);
@@ -69,24 +74,64 @@ export class OpenAI implements Model {
         {
           ...finalConfig,
           messages,
+          stream: finalConfig.stream,
         },
-        { timeout },
+        { timeout, responseType: finalConfig.stream ? 'stream' : 'json' },
       );
 
-      const content = completion.data.choices[0].message?.content;
+      // @ts-ignore
+      const response: CreateChatCompletionResponse = completion.data;
+
+      let content: string | undefined;
+      if (finalConfig.stream) {
+        debug.write('[STREAM] response received:\n');
+        content = await new Promise<string>((resolve, reject) => {
+          let res = '';
+          response.on('data', (message: Buffer) => {
+            const stringfied = message.toString('ascii').split('\n');
+            for (const line of stringfied) {
+              try {
+                const cleaned = line.replace('data:', '').trim();
+                if (cleaned.length === 0 || cleaned === '[DONE]') {
+                  continue;
+                }
+
+                const parsed = jsonic(cleaned);
+                const text = parsed.choices[0].delta.content ?? '';
+
+                debug.write(text);
+                events?.emit('data', text);
+                res += text;
+              } catch (e) {
+                debug.error('Error parsing content:', message.toString('ascii'), e);
+              }
+            }
+          });
+          response.on('close', () => {
+            resolve(res);
+          });
+          response.on('error', () => reject(new Error('Error reading stream')));
+        });
+        debug.write('\n[STREAM] response end\n');
+      } else {
+        content = completion.data.choices[0].message?.content;
+      }
+
       const usage = completion.data.usage;
-      if (!content || !usage) {
+      if (!content) {
         throw new Error('Completion response malformed');
       }
 
       return {
         content,
         model: completion.data.model,
-        usage: {
-          totalTokens: usage.total_tokens,
-          promptTokens: usage.prompt_tokens,
-          completionTokens: usage.completion_tokens,
-        },
+        usage: usage
+          ? {
+              totalTokens: usage.total_tokens,
+              promptTokens: usage.prompt_tokens,
+              completionTokens: usage.completion_tokens,
+            }
+          : undefined,
       };
     } catch (error: unknown) {
       if (!isAxiosError(error)) {
@@ -108,10 +153,11 @@ export class OpenAI implements Model {
         debug.log(`Completion rate limited, retrying... attempts left: ${retries}`);
         await sleep(retryInterval);
         return this.request(messages, config, {
-          ...opt,
           retries: retries - 1,
           // double the interval everytime we retry
           retryInterval: retryInterval * 2,
+          timeout,
+          events,
         });
       }
 

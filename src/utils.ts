@@ -10,6 +10,8 @@ log.log = console.log.bind(console);
 export const debug = {
   error,
   log,
+  write: (t: string) =>
+    process.env.DEBUG && 'llamaflow:stream'.match(process.env.DEBUG) && process.stdout.write(t),
 };
 
 export function sleep(delay: number) {

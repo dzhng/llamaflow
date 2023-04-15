@@ -1,3 +1,4 @@
+import EventEmitter from 'events';
 import { z } from 'zod';
 
 import { MaybePromise } from './utils';
@@ -16,6 +17,7 @@ export interface ModelConfig {
   frequencyPenalty?: number;
   logitBias?: Record<string, number>;
   user?: string;
+  stream?: boolean;
 }
 
 export interface ChatConfig {
@@ -37,12 +39,15 @@ export type ChatRequestOptions = {
 
   // override the messages used for completion, only use this if you understand the API well
   messages?: Message[];
+
+  // pass in an event emitter to receive message stream events
+  events?: EventEmitter;
 };
 
 export interface ChatResponse<T = string> {
   content: T;
   model: string;
-  usage: {
+  usage?: {
     promptTokens: number;
     completionTokens: number;
     totalTokens: number;
