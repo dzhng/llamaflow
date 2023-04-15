@@ -4,6 +4,7 @@ import { OpenAI, Persona, prompt } from './src';
 
 async function go() {
   const model = new OpenAI({ apiKey: process.env.OPENAI_KEY ?? 'YOUR_OPENAI_KEY' });
+  console.info('Model created', model);
 
   const assistant: Persona = {
     prompt: 'You are a smart and honest AI assistant',
