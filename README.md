@@ -269,6 +269,31 @@ You can also specify different logging types via:
 `DEBUG=llamaflow:error yarn playground`
 `DEBUG=llamaflow:log yarn playground`
 
+### Token Usage
+
+A common error with LLM APIs is token usage - you are only allowed to fit a certain amount of data in the context window. In the case of LLamaFlow, this means you are limited in the total number of messages you can send (if `retainMemory` is set to `true`) and the length of the content of the messages.
+
+LLamaFlow will automatically determine if the request will breach the token limit BEFORE sending the actual request to the model provider (e.g. OpenAI). This will save one network round-trip call and let you handle these type of errors in a responsive manner. The typical way of handling these errors are to remove messages in the message history (if you are using chat with `retainMemory` set), or split your content into smaller clusters and process them in multiple requests. LLamaFlow is unopinionated in how you would handle these type of errors, as they differ per application, and will just provide a convenient way to detect these type of issues.
+
+Here is an example of catching the token overflow error. Note that `minimumResponseTokens` is set to a high value to explicitly trigger this error (`gpt-3.5-turbo` has a max context limit of 4096, so setting the minimum limit to 4095 means there is only 1 token left for the actual prompt, which is not enough for the example below.)
+
+```typescript
+try {
+  const chat = model.chat({
+    prompt: 'You are an AI assistant',
+    config: { model: 'gpt-3.5-turbo' },
+  });
+  await chat.request(
+    { message: 'hello world, testing overflow logic' },
+    { minimumResponseTokens: 4095 },
+  );
+} catch (e) {
+  if (e instanceof TokenError) {
+    console.info(`Caught token overflow, overflowed tokens: ${e.overflowTokens}`);
+  }
+}
+```
+
 ## ✅ API Reference
 
 ### Model
@@ -474,6 +499,9 @@ type ChatRequestOptions = {
   retries?: number;
   retryInterval?: number;
   timeout?: number;
+
+  // the minimum amount of tokens to allocate for the response. if the request is predicted to not have enough tokens, it will automatically throw a 'TokenError' without sending the request
+  minimumResponseTokens?: number;
 
   // override the messages used for completion, only use this if you understand the API well
   messages?: Message[];

@@ -185,6 +185,7 @@ export class OpenAI implements Model {
           // double the interval everytime we retry
           retryInterval: retryInterval * 2,
           timeout,
+          minimumResponseTokens,
           events,
         });
       }

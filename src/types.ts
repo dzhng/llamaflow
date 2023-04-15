@@ -40,8 +40,7 @@ export type ChatRequestOptions = {
   retryInterval?: number;
   timeout?: number;
 
-  // what is the minimum amount of tokens to allocate for the response
-  // if the request is predicted to not have enough tokens, it will automatically throw a 'TokenError' without sending the request
+  // the minimum amount of tokens to allocate for the response. if the request is predicted to not have enough tokens, it will automatically throw a 'TokenError' without sending the request
   minimumResponseTokens?: number;
 
   // override the messages used for completion, only use this if you understand the API well
