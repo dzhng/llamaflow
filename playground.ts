@@ -14,20 +14,31 @@ async function benchmark(opt: ModelConfig) {
     ],
   };
 
+  const chat3 = model.chat({
+    prompt: 'You are an AI assistant',
+    config: { model: 'gpt-3.5-turbo' },
+  });
   try {
-    const chat3 = model.chat({
-      prompt: 'You are an AI assistant',
-      config: { model: 'gpt-3.5-turbo' },
-    });
     await chat3.request(
       { message: 'hello world, testing overflow logic' },
-      { minimumResponseTokens: 4095 },
+      { minimumResponseTokens: 4080 },
     );
   } catch (e) {
     if (e instanceof TokenError) {
       console.info(`Caught token overflow, overflowed tokens: ${e.overflowTokens}`);
     }
   }
+
+  const response3 = await chat3.requestWithSplit(
+    'hello world, testing overflow logic',
+    text => ({
+      message: text,
+    }),
+    { minimumResponseTokens: 4080 },
+    100,
+    12,
+  );
+  console.info('Successful query by reducing prompt', response3.content);
 
   const chat2 = model.chat(assistant);
   const response2 = await chat2.request(

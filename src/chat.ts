@@ -1,8 +1,10 @@
 import { defaults } from 'lodash';
 
 import { PromptDefaultRetries } from './config';
+import { TokenError } from './models/errors';
 import { Model } from './models/interface';
 import { buildMessage } from './persona';
+import { RecursiveCharacterTextSplitter } from './text-splitter';
 import type {
   ChatConfig,
   ChatRequestOptions,
@@ -12,6 +14,9 @@ import type {
   RawPrompt,
 } from './types';
 import { debug } from './utils';
+
+const DefaultChunkSize = 50_000;
+const DefaultMinChunkSize = 1000;
 
 export class Chat {
   persona: Persona;
@@ -97,6 +102,42 @@ export class Chat {
     // Type 'ChatResponse<string>' is not assignable to type 'ChatResponse<T>'
     // Will cast to any for now
     return response as any;
+  }
+
+  // make a requset, and split the text via chunk size if request is unsuccessful. continues until the request is split into the right chunk size
+  requestWithSplit<T>(
+    originalText: string,
+    requestFn: (text: string, currentChunkSize: number) => RawPrompt<T>,
+    opt?: ChatRequestOptions,
+    chunkSize = DefaultChunkSize,
+    minumChunkSize = DefaultMinChunkSize,
+  ): Promise<ChatResponse<T>> {
+    if (chunkSize < minumChunkSize) {
+      throw new Error(
+        'Text chunk size is below the minumim required chunk size, cannot split anymore',
+      );
+    }
+
+    try {
+      const res = this.request(requestFn(originalText, chunkSize), opt);
+      return res;
+    } catch (e) {
+      if (e instanceof TokenError) {
+        const textSplitter = new RecursiveCharacterTextSplitter({
+          chunkSize,
+        });
+
+        return this.requestWithSplit(
+          textSplitter.splitText(originalText)[0],
+          requestFn,
+          opt,
+          chunkSize / 2,
+          minumChunkSize,
+        );
+      } else {
+        throw e;
+      }
+    }
   }
 
   reset() {
