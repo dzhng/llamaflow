@@ -12,6 +12,7 @@ The Typescript-first prompt engineering toolkit for working with chat based larg
   - [Prompts](#prompts)
   - [Chats](#chats)
   - [Custom Prompts](#custom-prompts)
+- [Text Splitter](#-text-splitter)
 - [Debugging](#-debugging)
 - [API Reference](#-api-reference)
 
@@ -258,18 +259,7 @@ const titles = await chat.request(
 );
 ```
 
-## 🤓 Debugging
-
-LLamaFlow usese the `debug` module for logging & error messages. To run in debug mode, set the `DEBUG` env variable:
-
-`DEBUG=llamaflow:* yarn playground`
-
-You can also specify different logging types via:
-
-`DEBUG=llamaflow:error yarn playground`
-`DEBUG=llamaflow:log yarn playground`
-
-### Token Usage
+## 📃 Text Splitter
 
 A common error with LLM APIs is token usage - you are only allowed to fit a certain amount of data in the context window. In the case of LLamaFlow, this means you are limited in the total number of messages you can send (if `retainMemory` is set to `true`) and the length of the content of the messages.
 
@@ -305,6 +295,17 @@ const response = await chat.requestWithSplit('hello world, testing overflow logi
 ```
 
 Note that now, the main content of the prompt is submitted first. This is the content that will be split by the text splitter (along the `\n`, `.`, `,`, and ` ` characters first, to chunk it). You can add any additional required prompts and combine it with the content prompt in the `responseFn` parameter.
+
+## 🤓 Debugging
+
+LLamaFlow usese the `debug` module for logging & error messages. To run in debug mode, set the `DEBUG` env variable:
+
+`DEBUG=llamaflow:* yarn playground`
+
+You can also specify different logging types via:
+
+`DEBUG=llamaflow:error yarn playground`
+`DEBUG=llamaflow:log yarn playground`
 
 ## ✅ API Reference
 
