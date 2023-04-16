@@ -297,7 +297,7 @@ try {
 A common way to handle token limit issues is to split your content. LLamaFlow provides a useful helper method that wraps the `chat.request` method and will automatically split your text based on an input chunk config. It's smart enough to only split your text if it determines that it is above the token limit, and will try to preserve as much of the original text as possible.
 
 ```typescript
-const response = await chat3.requestWithSplit('hello world, testing overflow logic', text =>
+const response = await chat.requestWithSplit('hello world, testing overflow logic', text =>
   prompt.text({
     message: `Add other required prompts first, then add your content: ${text}`,
   }),
