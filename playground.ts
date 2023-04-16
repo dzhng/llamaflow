@@ -21,7 +21,7 @@ async function benchmark(opt: ModelConfig) {
   try {
     await chat3.request(
       { message: 'hello world, testing overflow logic' },
-      { minimumResponseTokens: 4080 },
+      { minimumResponseTokens: 4076 },
     );
   } catch (e) {
     if (e instanceof TokenError) {
@@ -34,9 +34,9 @@ async function benchmark(opt: ModelConfig) {
     text => ({
       message: text,
     }),
-    { minimumResponseTokens: 4080 },
+    { minimumResponseTokens: 4076 },
     100,
-    12,
+    10,
   );
   console.info('Successful query by reducing prompt', response3.content);
 

@@ -105,7 +105,7 @@ export class Chat {
   }
 
   // make a requset, and split the text via chunk size if request is unsuccessful. continues until the request is split into the right chunk size
-  requestWithSplit<T>(
+  async requestWithSplit<T>(
     originalText: string,
     requestFn: (text: string, currentChunkSize: number) => RawPrompt<T>,
     opt?: ChatRequestOptions,
@@ -119,19 +119,21 @@ export class Chat {
     }
 
     try {
-      const res = this.request(requestFn(originalText, chunkSize), opt);
+      const res = await this.request(requestFn(originalText, chunkSize), opt);
       return res;
     } catch (e) {
       if (e instanceof TokenError) {
         const textSplitter = new RecursiveCharacterTextSplitter({
           chunkSize,
+          chunkOverlap: Math.floor(Math.min(chunkSize / 4, 200)),
         });
 
+        debug.log(`⚠️ Request prompt too long, splitting text with chunk size of ${chunkSize}`);
         return this.requestWithSplit(
           textSplitter.splitText(originalText)[0],
           requestFn,
           opt,
-          chunkSize / 2,
+          Math.floor(chunkSize / 2),
           minumChunkSize,
         );
       } else {
