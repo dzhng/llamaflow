@@ -18,6 +18,8 @@ import { debug } from './utils';
 const DefaultChunkSize = 50_000;
 const DefaultMinChunkSize = 1000;
 
+export type SplitRequestFn<T> = (text: string, chunkSize: number) => RawPrompt<T>;
+
 export class Chat {
   persona: Persona;
   config: ChatConfig;
@@ -107,7 +109,7 @@ export class Chat {
   // make a requset, and split the text via chunk size if request is unsuccessful. continues until the request is split into the right chunk size
   async requestWithSplit<T>(
     originalText: string,
-    requestFn: (text: string, currentChunkSize: number) => RawPrompt<T>,
+    requestFn: SplitRequestFn<T>,
     opt?: ChatRequestOptions,
     chunkSize = DefaultChunkSize,
     minumChunkSize = DefaultMinChunkSize,

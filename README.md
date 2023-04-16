@@ -273,7 +273,7 @@ You can also specify different logging types via:
 
 A common error with LLM APIs is token usage - you are only allowed to fit a certain amount of data in the context window. In the case of LLamaFlow, this means you are limited in the total number of messages you can send (if `retainMemory` is set to `true`) and the length of the content of the messages.
 
-LLamaFlow will automatically determine if the request will breach the token limit BEFORE sending the actual request to the model provider (e.g. OpenAI). This will save one network round-trip call and let you handle these type of errors in a responsive manner. The typical way of handling these errors are to remove messages in the message history (if you are using chat with `retainMemory` set), or split your content into smaller clusters and process them in multiple requests. LLamaFlow is unopinionated in how you would handle these type of errors, as they differ per application, and will just provide a convenient way to detect these type of issues.
+LLamaFlow will automatically determine if the request will breach the token limit BEFORE sending the actual request to the model provider (e.g. OpenAI). This will save one network round-trip call and let you handle these type of errors in a responsive manner. The typical way of handling these errors are to remove messages in the message history (if you are using chat with `retainMemory` set), or split your content into smaller clusters and process them in multiple requests.
 
 Here is an example of catching the token overflow error. Note that `minimumResponseTokens` is set to a high value to explicitly trigger this error (`gpt-3.5-turbo` has a max context limit of 4096, so setting the minimum limit to 4095 means there is only 1 token left for the actual prompt, which is not enough for the example below.)
 
@@ -293,6 +293,18 @@ try {
   }
 }
 ```
+
+A common way to handle token limit issues is to split your content. LLamaFlow provides a useful helper method that wraps the `chat.request` method and will automatically split your text based on an input chunk config. It's smart enough to only split your text if it determines that it is above the token limit, and will try to preserve as much of the original text as possible.
+
+```typescript
+const response = await chat3.requestWithSplit('hello world, testing overflow logic', text =>
+  prompt.text({
+    message: `Add other required prompts first, then add your content: ${text}`,
+  }),
+);
+```
+
+Note that now, the main content of the prompt is submitted first. This is the content that will be split by the text splitter (along the `\n`, `.`, `,`, and ` ` characters first, to chunk it). You can add any additional required prompts and combine it with the content prompt in the `responseFn` parameter.
 
 ## ✅ API Reference
 

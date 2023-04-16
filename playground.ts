@@ -31,9 +31,10 @@ async function benchmark(opt: ModelConfig) {
 
   const response3 = await chat3.requestWithSplit(
     'hello world, testing overflow logic',
-    text => ({
-      message: text,
-    }),
+    text =>
+      prompt.text({
+        message: text,
+      }),
     { minimumResponseTokens: 4076 },
     100,
     10,
