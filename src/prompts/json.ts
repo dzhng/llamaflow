@@ -55,8 +55,8 @@ export default function buildRawPrompt<T extends z.ZodType>(
             retryPrompt: ((prompt.retryMessage ?? '') + '\n' + issuesMessage).trim(),
           };
         }
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (e) {
+        debug.error('Error building json prompt:', e);
         return {
           success: false,
           retryPrompt:
