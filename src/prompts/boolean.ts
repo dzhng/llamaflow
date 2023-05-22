@@ -3,11 +3,11 @@ import type { BooleanPrompt, RawPrompt } from '../types';
 const truthyValues = ['true', 'yes'];
 const falsyValues = ['false', 'no'];
 const formatPrompt =
-  'Respond to the above statement only with the word "true" or "false", nothing else.';
+  'Respond to the below prompt only with the word "true" or "false", nothing else.';
 
 export default function buildRawPrompt(prompt: BooleanPrompt): RawPrompt<boolean> {
   return {
-    message: `${prompt.message}\n${formatPrompt}`,
+    message: `${formatPrompt}\n\n${prompt.message}`,
     parse: async response => {
       // clean up the response a bit, sometimes the model likes to add a period, or make it a full sentence
       const cleaned = response.content

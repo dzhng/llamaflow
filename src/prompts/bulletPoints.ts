@@ -28,7 +28,7 @@ export default function buildRawPrompt(prompt: BulletPointsPrompt): RawPrompt<st
   ]);
 
   return buildJSONPrompt({
-    message: `${formatMessages.join(' ')}\nPrompt:\n${prompt.message}`,
+    message: `${formatMessages.join(' ')}\n\n${prompt.message}`,
 
     // parse by splitting the returned text into individual lines, then filtering out the non-bulletpoint lines (sometimes the LLM will still return some other text, like an title or explaination).
     parseResponse: res =>
