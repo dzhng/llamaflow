@@ -43,5 +43,8 @@ export default function buildRawPrompt(prompt: BulletPointsPrompt): RawPrompt<st
           `There should be exactly ${prompt.amount} bullet points, no more or less.`,
         )
       : arraySchema,
+
+    retryMessage:
+      "Respond to the prompt above in bullet points, where each bullet point starts with the - character. Don't include any other text other than the bullet points.",
   });
 }

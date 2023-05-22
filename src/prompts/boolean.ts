@@ -13,13 +13,19 @@ export default function buildRawPrompt(prompt: BooleanPrompt): RawPrompt<boolean
       const cleaned = response.content
         .replace(/\.|"|'/g, '')
         .toLowerCase()
-        .trim();
+        .trim()
+        .split(' ')[0]; // do split here to get rid of unnecessary prose the model sometimes adds
+
       if (truthyValues.includes(cleaned)) {
         return { success: true, data: true };
       } else if (falsyValues.includes(cleaned)) {
         return { success: true, data: false };
       } else {
-        return { success: false, retryPrompt: formatPrompt };
+        return {
+          success: false,
+          retryPrompt:
+            'Respond to the prompt above with only the word "true" or "false", nothing else.',
+        };
       }
     },
   };
