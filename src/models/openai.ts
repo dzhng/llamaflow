@@ -18,7 +18,7 @@ import type {
   ChatResponse,
   Message,
   ModelConfig,
-  OpenAIConfig,
+  OpenAIConfigurationParameters,
   Persona,
 } from '../types';
 import { debug, sleep } from '../utils';
@@ -51,7 +51,11 @@ export class OpenAI implements Model {
   defaults: ModelConfig;
   config: ChatConfig;
 
-  constructor(config: OpenAIConfig, defaults?: ModelConfig, chatConfig?: ChatConfig) {
+  constructor(
+    config: OpenAIConfigurationParameters,
+    defaults?: ModelConfig,
+    chatConfig?: ChatConfig,
+  ) {
     const configuration = new Configuration({ apiKey: config.apiKey });
     this._model = new OpenAIApi(configuration);
     this.defaults = defaults ?? {};

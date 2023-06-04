@@ -1,11 +1,10 @@
 import EventEmitter from 'events';
+import { ConfigurationParameters } from 'openai';
 import { z } from 'zod';
 
 import { MaybePromise } from './utils';
 
-export interface OpenAIConfig {
-  apiKey: string;
-}
+export type OpenAIConfigurationParameters = ConfigurationParameters;
 
 export interface ModelConfig {
   model?: string;
