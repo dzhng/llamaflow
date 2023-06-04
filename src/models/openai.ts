@@ -199,7 +199,9 @@ export class OpenAI implements Model {
         error.code === 'ECONNRESET' ||
         (error.response && (error.response.status === 429 || error.response.status >= 500))
       ) {
-        debug.log(`Completion rate limited, retrying... attempts left: ${retries}`);
+        debug.log(
+          `Completion rate limited (${error.code}, ${error.response?.status}), retrying... attempts left: ${retries}`,
+        );
         await sleep(retryInterval);
         return this.request(messages, config, {
           retries: retries - 1,
