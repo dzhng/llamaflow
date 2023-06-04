@@ -3,7 +3,9 @@ import { z } from 'zod';
 import { ModelConfig, OpenAI, Persona, prompt, TokenError } from './src';
 
 async function benchmark(opt: ModelConfig) {
-  const model = new OpenAI({ apiKey: process.env.OPENAI_KEY ?? 'YOUR_OPENAI_KEY' }, opt);
+  const model = new OpenAI({ apiKey: process.env.OPENAI_KEY ?? 'YOUR_OPENAI_KEY' }, opt, {
+    options: { retries: 2, timeout: 5 * 60_000 },
+  });
   console.info('Model created', model);
 
   const assistant: Persona = {
