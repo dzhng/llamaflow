@@ -573,3 +573,19 @@ const res = await model.request(messages: Message[], options: ChatRequestOptions
 ```
 
 This will bypass any chat history management, prompt formatting & parsing, as well as persona logic. You can still make use of the API retries feature via `ChatRequestOptions`.
+
+#### Azure
+
+LLamaFlow also comes with support for Azure's OpenAI models. The Azure version is usually much faster and more reliable than OpenAI's own API endpoints. In order to use the Azure endpoints, you must include 2 Azure specific options when initializing the OpenAI model, `azureDeployment` and `azureEndpoint`. The `apiKey` field will also now be used for the Azure API key.
+
+You can find the Azure API key and endpoint in the [Azure Portal](https://portal.azure.com/). The Azure Deployment must be created under the [Azure AI Portal](https://oai.azure.com/).
+
+Note that the `model` parameter in `ModelConfig` will be ignored when using Azure. This is because in the Azure system, the `model` is selected on deployment creation, not on run time.
+
+```typescript
+const model = new OpenAI({
+  apiKey: 'AZURE_OPENAI_KEY',
+  azureDeployment: 'AZURE_DEPLOYMENT_NAME',
+  azureEndpoint: 'AZURE_ENDPOINT',
+});
+```
