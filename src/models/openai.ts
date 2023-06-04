@@ -63,7 +63,9 @@ export class OpenAI implements Model {
     const configuration = new Configuration({
       ...config,
       basePath: this._isAzure
-        ? `${config.azureEndpoint}/openai/deployments/${config.azureDeployment}`
+        ? `${config.azureEndpoint}${
+            config.azureEndpoint?.at(-1) === '/' ? '' : '/'
+          }openai/deployments/${config.azureDeployment}`
         : undefined,
     });
     this._headers = this._isAzure ? { 'api-key': String(config.apiKey) } : undefined;
