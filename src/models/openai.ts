@@ -29,6 +29,7 @@ import type { Model } from './interface';
 interface CreateChatCompletionResponse extends Readable {}
 
 const Defaults: CreateChatCompletionRequest = { model: 'gpt-3.5-turbo', messages: [] };
+const AzureQueryParams = { 'api-version': '2023-03-15-preview' };
 
 const getTokenLimit = (model: string) => (model === 'gpt-4' ? 8000 : 4096);
 const encoder = tiktoken.getEncoding('cl100k_base');
@@ -48,6 +49,8 @@ const convertConfig = (config: Partial<ModelConfig>): Partial<CreateChatCompleti
 
 export class OpenAI implements Model {
   _model: OpenAIApi;
+  _isAzure: boolean;
+  _headers?: Record<string, string>;
   defaults: ModelConfig;
   config: ChatConfig;
 
@@ -56,8 +59,16 @@ export class OpenAI implements Model {
     defaults?: ModelConfig,
     chatConfig?: ChatConfig,
   ) {
-    const configuration = new Configuration({ apiKey: config.apiKey });
+    this._isAzure = Boolean(config.azureEndpoint && config.azureDeployment);
+    const configuration = new Configuration({
+      ...config,
+      basePath: this._isAzure
+        ? `${config.azureEndpoint}/openai/deployments/${config.azureDeployment}`
+        : undefined,
+    });
+    this._headers = this._isAzure ? { 'api-key': String(config.apiKey) } : undefined;
     this._model = new OpenAIApi(configuration);
+
     this.defaults = defaults ?? {};
     this.config = chatConfig ?? {};
   }
@@ -107,7 +118,12 @@ export class OpenAI implements Model {
           messages,
           stream: finalConfig.stream,
         },
-        { timeout, responseType: finalConfig.stream ? 'stream' : 'json' },
+        {
+          timeout,
+          responseType: finalConfig.stream ? 'stream' : 'json',
+          params: this._isAzure ? AzureQueryParams : undefined,
+          headers: this._headers,
+        },
       );
 
       // @ts-ignore
@@ -120,6 +136,7 @@ export class OpenAI implements Model {
           let res = '';
           response.on('data', (message: Buffer) => {
             const stringfied = message.toString('utf8').split('\n');
+
             for (const line of stringfied) {
               try {
                 const cleaned = line.replace('data:', '').trim();

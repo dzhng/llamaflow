@@ -4,7 +4,10 @@ import { z } from 'zod';
 
 import { MaybePromise } from './utils';
 
-export type OpenAIConfigurationParameters = ConfigurationParameters;
+export type OpenAIConfigurationParameters = ConfigurationParameters & {
+  azureEndpoint?: string;
+  azureDeployment?: string;
+};
 
 export interface ModelConfig {
   model?: string;
