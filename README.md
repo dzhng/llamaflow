@@ -5,7 +5,6 @@
 The Typescript-first prompt engineering toolkit for working with chat based large language models (LLMs).
 
 - [Introduction](#-introduction)
-- [Why](#-why-llamaflow)
 - [Usage](#-usage)
   - [Install](#install)
   - [Personas](#personas)
@@ -14,17 +13,17 @@ The Typescript-first prompt engineering toolkit for working with chat based larg
   - [Custom Prompts](#custom-prompts)
 - [Text Splitter](#-text-splitter)
 - [Debugging](#-debugging)
+- [Azure](#-azure)
 - [API Reference](#-api-reference)
 
 ## 👋 Introduction
 
-LLamaFlow is the middleware layer that sits between your software and the AI model. The pattern for generating correct outputs from LLMs is converging on _ask and validate_, where after the initial generation, there is a back-and-forth with the model itself to correct the output according to spec. LLamaFlow abstracts away this entire process, and exposes a simple request & response API for the model where all responses are validated.
+LLamaFlow is the middleware layer that sits between your software and the AI model, it adds the following capabilities on top of the standard chat completion API:
 
-Specifically, this package adds the following capabilities on top of the standard chat API:
-
-- Nicer API for sending & retriving messages from models, no need to keep track of message memory manually.
+- Support for structured outputs from models with complete type safety. All responses are fully validated & typed, works with [zod](https://github.com/colinhacks/zod) as a peer dep.
 - Schema definition, serialization / parsing, and **automatically asking the model to correct outputs**.
 - Custom content validation hook that allows you to add your own valider for all model outputs, including logic on how to reask the model.
+- Nicer API for sending & retriving chat messages from models, no need to keep track of message memory manually.
 - Handle rate limit and any other API errors as gracefully as possible (e.g. exponential backoff for rate-limit).
 
 With LLamaFlow, you can simply query OpenAI's ChatGPT model like so:
@@ -52,17 +51,6 @@ const response = await chat.request(
 
 console.log(response.content); // content will be typed as string[];
 ```
-
-## 🤔 Why LLamaFlow
-
-There are a few other prompt engineering libraries for typescript / javascript, most notably [Langchain](https://github.com/hwchase17/langchainjs). Compared to other solutions, LLamaFlow differentiates by being chat-first, and supports structured, _fully typed_ outputs by default. LLamaFlow also focuses purely on interacting with the model - it doesn't have the complexity of managing multiple types of chains / agents / memory, which should hopefully make for a much simpler & more extensible API. If you need memory or agent capabilities, you will have to build it yourself, as it does not come out of the box. (or use it together with Langchain, they can complement each other well.)
-
-TLDR:
-
-- Everything is Typescript-first with responses fully validated & typed, works great with the excellent [zod](https://github.com/colinhacks/zod) package as a peer dep.
-- Chat based completion only - there are no plans to support traditional LLM completion. I believe chat inspired LLM APIs are where all foundation models are converging to, due to the steerability provided by having explicit separation of system & user prompts.
-
-If you are wondering why the name LLamaFlow - 🦙 LLama is a play on LLM, inspired by the excellent [LlamaIndex](https://github.com/jerryjliu/llama_index).
 
 ## 🔨 Usage
 
@@ -306,6 +294,22 @@ You can also specify different logging types via:
 
 `DEBUG=llamaflow:error yarn playground`
 `DEBUG=llamaflow:log yarn playground`
+
+## 🔷 Azure
+
+LLamaFlow also comes with support for Azure's OpenAI models. The Azure version is usually much faster and more reliable than OpenAI's own API endpoints. In order to use the Azure endpoints, you must include 2 Azure specific options when initializing the OpenAI model, `azureDeployment` and `azureEndpoint`. The `apiKey` field will also now be used for the Azure API key.
+
+You can find the Azure API key and endpoint in the [Azure Portal](https://portal.azure.com/). The Azure Deployment must be created under the [Azure AI Portal](https://oai.azure.com/).
+
+Note that the `model` parameter in `ModelConfig` will be ignored when using Azure. This is because in the Azure system, the `model` is selected on deployment creation, not on run time.
+
+```typescript
+const model = new OpenAI({
+  apiKey: 'AZURE_OPENAI_KEY',
+  azureDeployment: 'AZURE_DEPLOYMENT_NAME',
+  azureEndpoint: 'AZURE_ENDPOINT',
+});
+```
 
 ## ✅ API Reference
 
@@ -573,19 +577,3 @@ const res = await model.request(messages: Message[], options: ChatRequestOptions
 ```
 
 This will bypass any chat history management, prompt formatting & parsing, as well as persona logic. You can still make use of the API retries feature via `ChatRequestOptions`.
-
-#### Azure
-
-LLamaFlow also comes with support for Azure's OpenAI models. The Azure version is usually much faster and more reliable than OpenAI's own API endpoints. In order to use the Azure endpoints, you must include 2 Azure specific options when initializing the OpenAI model, `azureDeployment` and `azureEndpoint`. The `apiKey` field will also now be used for the Azure API key.
-
-You can find the Azure API key and endpoint in the [Azure Portal](https://portal.azure.com/). The Azure Deployment must be created under the [Azure AI Portal](https://oai.azure.com/).
-
-Note that the `model` parameter in `ModelConfig` will be ignored when using Azure. This is because in the Azure system, the `model` is selected on deployment creation, not on run time.
-
-```typescript
-const model = new OpenAI({
-  apiKey: 'AZURE_OPENAI_KEY',
-  azureDeployment: 'AZURE_DEPLOYMENT_NAME',
-  azureEndpoint: 'AZURE_ENDPOINT',
-});
-```
