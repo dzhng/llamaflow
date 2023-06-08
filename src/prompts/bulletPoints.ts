@@ -5,7 +5,9 @@ import { BulletPointsPrompt, RawPrompt } from '../types';
 
 import buildJSONPrompt from './json';
 
-export default function buildRawPrompt(prompt: BulletPointsPrompt): RawPrompt<string[]> {
+export default function buildRawPrompt(
+  prompt: BulletPointsPrompt,
+): RawPrompt<string[]> {
   const arraySchema = z.array(
     prompt.length
       ? z
@@ -31,11 +33,11 @@ export default function buildRawPrompt(prompt: BulletPointsPrompt): RawPrompt<st
     message: `${formatMessages.join(' ')}\n\n${prompt.message}`,
 
     // parse by splitting the returned text into individual lines, then filtering out the non-bulletpoint lines (sometimes the LLM will still return some other text, like an title or explaination).
-    parseResponse: res =>
+    parseResponse: (res) =>
       res
         .split('\n')
-        .filter(s => s.includes('-'))
-        .map(s => s.replace('-', '').trim()),
+        .filter((s) => s.includes('-'))
+        .map((s) => s.replace('-', '').trim()),
 
     schema: prompt.amount
       ? arraySchema.length(

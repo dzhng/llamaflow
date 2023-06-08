@@ -97,6 +97,8 @@ export interface RawPrompt<T = string> {
   message: string;
   parse?: (
     response: ChatResponse<string>,
-  ) => MaybePromise<{ success: false; retryPrompt?: string } | { success: true; data: T }>;
+  ) => MaybePromise<
+    { success: false; retryPrompt?: string } | { success: true; data: T }
+  >;
   promptRetries?: number;
 }

@@ -28,13 +28,18 @@ import type { Model } from './interface';
 
 interface CreateChatCompletionResponse extends Readable {}
 
-const Defaults: CreateChatCompletionRequest = { model: 'gpt-3.5-turbo', messages: [] };
+const Defaults: CreateChatCompletionRequest = {
+  model: 'gpt-3.5-turbo',
+  messages: [],
+};
 const AzureQueryParams = { 'api-version': '2023-03-15-preview' };
 
 const getTokenLimit = (model: string) => (model === 'gpt-4' ? 8000 : 4096);
 const encoder = tiktoken.getEncoding('cl100k_base');
 
-const convertConfig = (config: Partial<ModelConfig>): Partial<CreateChatCompletionRequest> => ({
+const convertConfig = (
+  config: Partial<ModelConfig>,
+): Partial<CreateChatCompletionRequest> => ({
   model: config.model,
   temperature: config.temperature,
   top_p: config.topP,
@@ -68,7 +73,9 @@ export class OpenAI implements Model {
           }openai/deployments/${config.azureDeployment}`
         : undefined,
     });
-    this._headers = this._isAzure ? { 'api-key': String(config.apiKey) } : undefined;
+    this._headers = this._isAzure
+      ? { 'api-key': String(config.apiKey) }
+      : undefined;
     this._model = new OpenAIApi(configuration);
 
     this.defaults = defaults ?? {};
@@ -101,11 +108,20 @@ export class OpenAI implements Model {
       events,
     } = {} as ChatRequestOptions,
   ): Promise<ChatResponse<string>> {
-    const finalConfig = defaults(convertConfig(config), convertConfig(this.defaults), Defaults);
-    debug.log(`Sending request with ${retries} retries, config: ${JSON.stringify(finalConfig)}`);
+    const finalConfig = defaults(
+      convertConfig(config),
+      convertConfig(this.defaults),
+      Defaults,
+    );
+    debug.log(
+      `Sending request with ${retries} retries, config: ${JSON.stringify(
+        finalConfig,
+      )}`,
+    );
     try {
       // check if we'll have enough tokens to meet the minimum response
-      const maxPromptTokens = getTokenLimit(finalConfig.model) - minimumResponseTokens;
+      const maxPromptTokens =
+        getTokenLimit(finalConfig.model) - minimumResponseTokens;
       const messageTokens = this.getTokensFromMessages(messages);
       if (messageTokens > maxPromptTokens) {
         throw new TokenError(
@@ -153,7 +169,11 @@ export class OpenAI implements Model {
                 events?.emit('data', text);
                 res += text;
               } catch (e) {
-                debug.error('Error parsing content:', message.toString('utf8'), e);
+                debug.error(
+                  'Error parsing content:',
+                  message.toString('utf8'),
+                  e,
+                );
               }
             }
           });
@@ -199,7 +219,8 @@ export class OpenAI implements Model {
         error.code === 'ETIMEDOUT' ||
         error.code === 'ECONNABORTED' ||
         error.code === 'ECONNRESET' ||
-        (error.response && (error.response.status === 429 || error.response.status >= 500))
+        (error.response &&
+          (error.response.status === 429 || error.response.status >= 500))
       ) {
         debug.log(
           `Completion rate limited (${error.code}, ${error.response?.status}), retrying... attempts left: ${retries}`,
@@ -216,7 +237,9 @@ export class OpenAI implements Model {
       }
 
       if (error?.response?.status === 401) {
-        debug.error('Authorization error, did you set the OpenAI API key correctly?');
+        debug.error(
+          'Authorization error, did you set the OpenAI API key correctly?',
+        );
       }
 
       throw error;

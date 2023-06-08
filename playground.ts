@@ -3,9 +3,13 @@ import { z } from 'zod';
 import { ModelConfig, OpenAI, Persona, prompt, TokenError } from './src';
 
 async function benchmark(opt: ModelConfig) {
-  const model = new OpenAI({ apiKey: process.env.OPENAI_KEY ?? 'YOUR_OPENAI_KEY' }, opt, {
-    options: { retries: 2, timeout: 5 * 60_000 },
-  });
+  const model = new OpenAI(
+    { apiKey: process.env.OPENAI_KEY ?? 'YOUR_OPENAI_KEY' },
+    opt,
+    {
+      options: { retries: 2, timeout: 5 * 60_000 },
+    },
+  );
   console.info('Model created', model);
 
   const assistant: Persona = {
@@ -27,13 +31,15 @@ async function benchmark(opt: ModelConfig) {
     );
   } catch (e) {
     if (e instanceof TokenError) {
-      console.info(`Caught token overflow, overflowed tokens: ${e.overflowTokens}`);
+      console.info(
+        `Caught token overflow, overflowed tokens: ${e.overflowTokens}`,
+      );
     }
   }
 
   const response3 = await chat3.requestWithSplit(
     'hello world, testing overflow logic',
-    text =>
+    (text) =>
       prompt.text({
         message: text,
       }),
@@ -89,7 +95,9 @@ async function benchmark(opt: ModelConfig) {
 
   // `bulletPoints.content` will be automatically casted in the correct type as defined in the schema field of `bulletPrompt`
   console.info(
-    `The structured version of this response is: ${JSON.stringify(bulletPoints.content)}`,
+    `The structured version of this response is: ${JSON.stringify(
+      bulletPoints.content,
+    )}`,
   );
 
   const parsedBulletPrompt = prompt.json({
@@ -97,11 +105,14 @@ async function benchmark(opt: ModelConfig) {
       'Please rewrite this in a list of bullet points. Respond as a list of bullet points, where each bullet point begins with the "-" character. Each bullet point should be less than 200 characters. Put each bullet point on a new line.',
 
     // parse the response from the model so it can be fed into the schema validator
-    parseResponse: res => res.split('\n').map(s => s.replace('-', '').trim()),
+    parseResponse: (res) =>
+      res.split('\n').map((s) => s.replace('-', '').trim()),
 
     // it's useful to define custom error messages, any schema parse errors will be automatically fed back into the model on retry, so the model knows exactly what to correct.
     schema: z.array(
-      z.string().max(200, { message: 'This bullet point should be less than 200 characters.' }),
+      z.string().max(200, {
+        message: 'This bullet point should be less than 200 characters.',
+      }),
     ),
   });
 
@@ -127,7 +138,7 @@ async function benchmark(opt: ModelConfig) {
     prompt.text({
       message: `Please write a summary about the following article: ${article}`,
       promptRetries: 2,
-      parse: async response => {
+      parse: async (response) => {
         // Check if this summary is true or not
         const factCheck = await factCheckerChat.request(
           prompt.boolean({
@@ -141,7 +152,8 @@ async function benchmark(opt: ModelConfig) {
           // if `retryPrompt` is set, LLamaFlow will automatically retry with the text in this property.
           return {
             success: false,
-            retryPrompt: 'This summary is not true, please rewrite with only true facts.',
+            retryPrompt:
+              'This summary is not true, please rewrite with only true facts.',
           };
         }
       },
@@ -154,7 +166,9 @@ async function benchmark(opt: ModelConfig) {
     ),
   );
 
-  console.info(`The fact checked renaissance content is: ${factCheckedContent.content}`);
+  console.info(
+    `The fact checked renaissance content is: ${factCheckedContent.content}`,
+  );
 
   chat.reset();
 

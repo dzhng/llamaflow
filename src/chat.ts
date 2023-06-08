@@ -18,7 +18,10 @@ import { debug } from './utils';
 const DefaultChunkSize = 50_000;
 const DefaultMinChunkSize = 1000;
 
-export type SplitRequestFn<T> = (text: string, chunkSize: number) => RawPrompt<T>;
+export type SplitRequestFn<T> = (
+  text: string,
+  chunkSize: number,
+) => RawPrompt<T>;
 
 export class Chat {
   persona: Persona;
@@ -35,7 +38,10 @@ export class Chat {
     this.reset();
   }
 
-  async request<T>(prompt: RawPrompt<T>, opt?: ChatRequestOptions): Promise<ChatResponse<T>> {
+  async request<T>(
+    prompt: RawPrompt<T>,
+    opt?: ChatRequestOptions,
+  ): Promise<ChatResponse<T>> {
     debug.log('⬆️ sending request:', prompt.message);
     const newMessages: Message[] = [
       ...(opt?.messages ? opt.messages : this.messages),
@@ -46,7 +52,11 @@ export class Chat {
     ];
 
     const mergedOpt = defaults(opt, this.config.options);
-    const response = await this.model.request(newMessages, this.persona.config, mergedOpt);
+    const response = await this.model.request(
+      newMessages,
+      this.persona.config,
+      mergedOpt,
+    );
     if (!response) {
       throw new Error('Chat request failed');
     }
@@ -130,7 +140,9 @@ export class Chat {
           chunkOverlap: Math.floor(Math.min(chunkSize / 4, 200)),
         });
 
-        debug.log(`⚠️ Request prompt too long, splitting text with chunk size of ${chunkSize}`);
+        debug.log(
+          `⚠️ Request prompt too long, splitting text with chunk size of ${chunkSize}`,
+        );
         return this.requestWithSplit(
           textSplitter.splitText(originalText)[0],
           requestFn,

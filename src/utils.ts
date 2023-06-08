@@ -11,11 +11,13 @@ export const debug = {
   error,
   log,
   write: (t: string) =>
-    process.env.DEBUG && 'llamaflow:log'.match(process.env.DEBUG) && process.stdout.write(t),
+    process.env.DEBUG &&
+    'llamaflow:log'.match(process.env.DEBUG) &&
+    process.stdout.write(t),
 };
 
 export function sleep(delay: number) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(resolve, delay);
   });
 }
@@ -30,13 +32,17 @@ type IsFunction<T, K extends keyof T> = T[K] extends (...args: any[]) => any
 
 type PickData<T> = T extends { data?: any } ? T['data'] : undefined;
 
-type GetRawPromptResponse<T extends RawPrompt> = IsFunction<Required<T>, 'parse'> extends true
+type GetRawPromptResponse<T extends RawPrompt> = IsFunction<
+  Required<T>,
+  'parse'
+> extends true
   ? Awaited<ReturnType<NonNullable<T['parse']>>>
   : never;
 
-type GetRawPromptDataType<T extends RawPrompt> = GetRawPromptResponse<T> extends object
-  ? NonNullable<PickData<GetRawPromptResponse<T>>>
-  : never;
+type GetRawPromptDataType<T extends RawPrompt> =
+  GetRawPromptResponse<T> extends object
+    ? NonNullable<PickData<GetRawPromptResponse<T>>>
+    : never;
 
 export type PromptReturnType<T extends string | RawPrompt> = T extends string
   ? string

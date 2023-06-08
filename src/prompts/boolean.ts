@@ -5,10 +5,12 @@ const falsyValues = ['false', 'no'];
 const formatPrompt =
   'Respond to the below prompt only with the word "true" or "false", nothing else.';
 
-export default function buildRawPrompt(prompt: BooleanPrompt): RawPrompt<boolean> {
+export default function buildRawPrompt(
+  prompt: BooleanPrompt,
+): RawPrompt<boolean> {
   return {
     message: `${formatPrompt}\n\n${prompt.message}`,
-    parse: async response => {
+    parse: async (response) => {
       // clean up the response a bit, sometimes the model likes to add a period, or make it a full sentence
       const cleaned = response.content
         .replace(/\.|"|'/g, '')

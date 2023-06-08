@@ -13,5 +13,7 @@ export function buildMessage(persona: Persona): string {
     return getPersonaPrompt(persona);
   }
 
-  return `${getPersonaPrompt(persona).trim()}\n\nYou will:\n- ${persona.qualifiers.join('\n- ')}`;
+  return `${getPersonaPrompt(
+    persona,
+  ).trim()}\n\nYou will:\n- ${persona.qualifiers.join('\n- ')}`;
 }
