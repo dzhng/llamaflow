@@ -7,7 +7,7 @@ async function benchmark(opt: ModelConfig) {
     { apiKey: process.env.OPENAI_KEY ?? 'YOUR_OPENAI_KEY' },
     opt,
     {
-      options: { retries: 2, timeout: 5 * 60_000 },
+      options: { retries: 2, timeout: 10 * 60_000 },
     },
   );
   console.info('Model created', model);
@@ -199,6 +199,7 @@ async function benchmark(opt: ModelConfig) {
 const models = [
   'gpt-3.5-turbo-0301',
   'gpt-3.5-turbo-0613',
+  'gpt-3.5-turbo-16k-0613',
   'gpt-4-0314',
   'gpt-4-0613',
 ];
@@ -206,7 +207,7 @@ const models = [
 (async function go() {
   const results = [];
 
-  for (let itr = 0; itr < 5; itr++) {
+  for (let itr = 0; itr < 3; itr++) {
     for (const model of models) {
       const streamFalseStart = Date.now();
       await benchmark({ stream: false, model });
