@@ -216,7 +216,7 @@ const models = [
       results.push({
         model,
         iteration: itr,
-        time: streamFalseTime / 100,
+        time: streamFalseTime,
       });
     }
   }
