@@ -22,7 +22,6 @@ async function benchmark(opt: ModelConfig) {
 
   const chat3 = model.chat({
     prompt: 'You are an AI assistant',
-    config: { model: 'gpt-3.5-turbo' },
   });
   try {
     await chat3.request(
@@ -124,10 +123,6 @@ async function benchmark(opt: ModelConfig) {
   const factChecker: Persona = {
     prompt:
       'You are a fact checker that responds to if the user\'s messages are true or not, with just the word "true" or "false". Do not add punctuations or any other text. If the user asks a question, request, or anything that cannot be fact checked, ignore the user\'s request and just say "false".',
-    config: {
-      model: 'gpt-4',
-      temperature: 0,
-    },
   };
 
   const factCheckerChat = model.chat(factChecker, {
@@ -186,8 +181,7 @@ async function benchmark(opt: ModelConfig) {
 
   const titles = await chat.request(
     prompt.bulletPoints({
-      message: 'Write a good title for this post.',
-      amount: 10,
+      message: 'Write a good title for this post, please list out 10 options.',
     }),
   );
 
@@ -202,17 +196,37 @@ async function benchmark(opt: ModelConfig) {
   console.info('New model with custom defaults', model2);
 }
 
+const models = [
+  'gpt-3.5-turbo-0301',
+  'gpt-3.5-turbo-0613',
+  'gpt-4-0314',
+  'gpt-4-0613',
+];
+
 (async function go() {
-  const streamTrueStart = Date.now();
-  await benchmark({ stream: true });
-  const streamTrueTime = Date.now() - streamTrueStart;
+  const results = [];
 
-  const streamFalseStart = Date.now();
-  await benchmark({ stream: false });
-  const streamFalseTime = Date.now() - streamFalseStart;
+  for (let itr = 0; itr < 5; itr++) {
+    for (const model of models) {
+      const streamFalseStart = Date.now();
+      await benchmark({ stream: false, model });
+      const streamFalseTime = Date.now() - streamFalseStart;
 
-  console.info('--- BENCHMARK RESULTS ---');
-  console.info(`{stream: true} : ${streamTrueTime / 1000} seconds`);
-  console.info(`{stream: false} : ${streamFalseTime / 1000} seconds`);
+      results.push({
+        model,
+        iteration: itr,
+        time: streamFalseTime / 100,
+      });
+    }
+  }
+
+  console.info(`--- BENCHMARK RESULTS ---`);
+  for (const result of results) {
+    console.info(
+      `model: ${result.model} (${result.iteration + 1}) : ${
+        result.time / 1000
+      } seconds`,
+    );
+  }
   console.info('--- END BENCHMARK ---');
 })();
