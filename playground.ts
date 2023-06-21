@@ -207,7 +207,7 @@ const models = [
 (async function go() {
   const results = [];
 
-  for (let itr = 0; itr < 3; itr++) {
+  for (let itr = 0; itr < 1; itr++) {
     for (const model of models) {
       const streamFalseStart = Date.now();
       await benchmark({ stream: false, model });

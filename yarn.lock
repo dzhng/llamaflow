@@ -1590,6 +1590,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"base64-js@npm:^1.5.1":
+  version: 1.5.1
+  resolution: "base64-js@npm:1.5.1"
+  checksum: 669632eb3745404c2f822a18fc3a0122d2f9a7a13f7fb8b5823ee19d1d2ff9ee5b52c53367176ea4ad093c332fd5ab4bd0ebae5a8e27917a4105a4cfc86b1005
+  languageName: node
+  linkType: hard
+
 "brace-expansion@npm:^1.1.7":
   version: 1.1.11
   resolution: "brace-expansion@npm:1.1.11"
@@ -4013,6 +4020,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"js-tiktoken@npm:^1.0.7":
+  version: 1.0.7
+  resolution: "js-tiktoken@npm:1.0.7"
+  dependencies:
+    base64-js: ^1.5.1
+  checksum: 4856641fed816e618c8a693db0a5478995c598914dec2ba9ccd69719a88a14756d5aec2eed0fba7a4999e603b277ba9a58fd7b2af98e8b638b39b436bbfb7060
+  languageName: node
+  linkType: hard
+
 "js-tokens@npm:^3.0.0 || ^4.0.0, js-tokens@npm:^4.0.0":
   version: 4.0.0
   resolution: "js-tokens@npm:4.0.0"
@@ -4210,12 +4226,12 @@ __metadata:
     eslint-plugin-prettier: ^4.2.1
     husky: ^8.0.2
     jest: ^29.5.0
+    js-tiktoken: ^1.0.7
     jsonic: ^1.0.1
     lint-staged: ^13.2.0
     lodash: ^4.17.21
     openai: ^3.2.1
     prettier: ^2.8.0
-    tiktoken-node: ^0.0.6
     ts-jest: ^29.0.5
     ts-node: ^10.9.1
     typescript: ^5.0.2
@@ -5675,13 +5691,6 @@ __metadata:
   version: 2.3.8
   resolution: "through@npm:2.3.8"
   checksum: a38c3e059853c494af95d50c072b83f8b676a9ba2818dcc5b108ef252230735c54e0185437618596c790bbba8fcdaef5b290405981ffa09dce67b1f1bf190cbd
-  languageName: node
-  linkType: hard
-
-"tiktoken-node@npm:^0.0.6":
-  version: 0.0.6
-  resolution: "tiktoken-node@npm:0.0.6"
-  checksum: 78f8b90f25268c12eac7553df6a1f9ee10b3e807e85c4bff50956a00b0f9f760b28580ae6b6e26d35f61e03e092b9618985d1826957f88bdc95c5b7303cc7d2d
   languageName: node
   linkType: hard
 

@@ -1,9 +1,9 @@
 import { isAxiosError } from 'axios';
+import tiktoken from 'js-tiktoken';
 import jsonic from 'jsonic';
 import { defaults } from 'lodash';
 import { Configuration, CreateChatCompletionRequest, OpenAIApi } from 'openai';
 import { Readable } from 'stream';
-import tiktoken from 'tiktoken-node';
 
 import { Chat } from '../chat';
 import {
