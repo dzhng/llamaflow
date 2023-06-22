@@ -180,6 +180,7 @@ export class OpenAI implements Model {
       }
 
       let content: string | undefined;
+      let usage: any;
       if (finalConfig.stream) {
         // @ts-ignore
         const response = completion.body as CreateChatCompletionResponse;
@@ -219,14 +220,15 @@ export class OpenAI implements Model {
         });
         debug.write('\n[STREAM] response end\n');
       } else {
-        content = (await completion.json()).choices[0].message?.content;
+        const body = await completion.json();
+        content = body.choices[0].message?.content;
+        usage = body.usage;
       }
 
       if (!content) {
         throw new Error('Completion response malformed');
       }
 
-      const usage = !finalConfig.stream && (await completion.json()).usage;
       return {
         content,
         isStream: Boolean(finalConfig.stream),
