@@ -51,11 +51,9 @@ export default function buildRawPrompt<T extends z.ZodType>(
               issue.path && issue.path.length > 0
                 ? `${prev}\nThere is an issue with the the value "${JSON.stringify(
                     get(json, issue.path),
-                  )}", at ${
-                    isArray
-                      ? `index ${issue.path[0]}`
-                      : `path ${issue.path.join('.')}`
-                  }. The issue is: ${issue.message}`
+                  )}", at path ${issue.path.join('.')}. The issue is: ${
+                    issue.message
+                  }`
                 : `\nThe issue is: ${issue.message}`,
             'There is an issue with that response, please rewrite.',
           );
@@ -74,9 +72,7 @@ export default function buildRawPrompt<T extends z.ZodType>(
           success: false,
           retryPrompt:
             prompt.retryMessage ??
-            `No valid JSON ${
-              isArray ? 'array' : 'object'
-            } was found, rewrite as valid JSON.`,
+            'No valid JSON  was found, rewrite as valid JSON.',
         };
       }
     },
