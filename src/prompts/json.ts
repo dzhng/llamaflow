@@ -1,6 +1,6 @@
 import jsonic from 'jsonic';
 import { get } from 'lodash';
-import { z, ZodArray } from 'zod';
+import { z } from 'zod';
 
 import type { JSONPrompt, RawPrompt } from '../types';
 import { debug } from '../utils';
@@ -16,22 +16,23 @@ export default function buildRawPrompt<T extends z.ZodType>(
   return {
     message: prompt.message,
     parse: async (response) => {
-      const isArray = prompt.schema instanceof ZodArray;
       try {
         let json: any;
         let extracted: string | undefined;
         if (!prompt.parseResponse) {
-          extracted = isArray
-            ? extractJSONArrayResponse(response.content)
-            : extractJSONObjectResponse(response.content);
+          const potientialArray = extractJSONArrayResponse(response.content);
+          const potientialObject = extractJSONObjectResponse(response.content);
+          // extract the larger text between potiential array and potiential object, we want the parent json object
+          extracted =
+            (potientialArray?.length ?? 0) > (potientialObject?.length ?? 0)
+              ? potientialArray
+              : potientialObject;
           if (!extracted) {
             return {
               success: false,
               retryPrompt:
                 prompt.retryMessage ??
-                `No valid JSON ${
-                  isArray ? 'array' : 'object'
-                } was found, rewrite as valid JSON.`,
+                'No valid JSON was found, rewrite as valid JSON.',
             };
           }
 
