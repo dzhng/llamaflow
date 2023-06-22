@@ -210,7 +210,7 @@ const models = [
   for (let itr = 0; itr < 1; itr++) {
     for (const model of models) {
       const streamStart = Date.now();
-      await benchmark({ stream: true, model });
+      await benchmark({ stream: false, model });
       const streamTime = Date.now() - streamStart;
 
       results.push({
