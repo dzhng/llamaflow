@@ -1,8 +1,11 @@
-import { isAxiosError } from 'axios';
 import tiktoken from 'js-tiktoken';
 import jsonic from 'jsonic';
 import { defaults } from 'lodash';
-import { Configuration, CreateChatCompletionRequest, OpenAIApi } from 'openai';
+import {
+  Configuration,
+  CreateChatCompletionRequest,
+  OpenAIApi,
+} from 'openai-edge';
 import { Readable } from 'stream';
 
 import { Chat } from '../chat';
@@ -31,6 +34,12 @@ interface CreateChatCompletionResponse extends Readable {}
 const Defaults: CreateChatCompletionRequest = {
   model: 'gpt-3.5-turbo',
   messages: [],
+};
+const RequestDefaults = {
+  retries: CompletionDefaultRetries,
+  retryInterval: RateLimitRetryIntervalMs,
+  timeout: CompletionDefaultTimeout,
+  minimumResponseTokens: MinimumResponseTokens,
 };
 const AzureQueryParams = { 'api-version': '2023-03-15-preview' };
 
@@ -70,7 +79,9 @@ export class OpenAI implements Model {
       basePath: this._isAzure
         ? `${config.azureEndpoint}${
             config.azureEndpoint?.at(-1) === '/' ? '' : '/'
-          }openai/deployments/${config.azureDeployment}`
+          }openai/deployments/${config.azureDeployment}?${new URLSearchParams(
+            AzureQueryParams,
+          )}`
         : undefined,
     });
     this._headers = this._isAzure
@@ -100,28 +111,28 @@ export class OpenAI implements Model {
   async request(
     messages: Message[],
     config = {} as Partial<ModelConfig>,
-    {
-      retries = CompletionDefaultRetries,
-      retryInterval = RateLimitRetryIntervalMs,
-      timeout = CompletionDefaultTimeout,
-      minimumResponseTokens = MinimumResponseTokens,
-      events,
-    } = {} as ChatRequestOptions,
+    requestOptions = {} as Partial<ChatRequestOptions>,
   ): Promise<ChatResponse<string>> {
     const finalConfig = defaults(
       convertConfig(config),
       convertConfig(this.defaults),
       Defaults,
     );
+    const finalRequestOptions = defaults(
+      requestOptions,
+      this.config.options,
+      RequestDefaults,
+    );
     debug.log(
-      `Sending request with ${retries} retries, config: ${JSON.stringify(
+      `Sending request with config: ${JSON.stringify(
         finalConfig,
-      )}`,
+      )}, options: ${JSON.stringify(finalRequestOptions)}`,
     );
     try {
       // check if we'll have enough tokens to meet the minimum response
       const maxPromptTokens =
-        getTokenLimit(finalConfig.model) - minimumResponseTokens;
+        getTokenLimit(finalConfig.model) -
+        finalRequestOptions.minimumResponseTokens;
       const messageTokens = this.getTokensFromMessages(messages);
       if (messageTokens > maxPromptTokens) {
         throw new TokenError(
@@ -130,6 +141,11 @@ export class OpenAI implements Model {
         );
       }
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(
+        () => controller.abort(),
+        finalRequestOptions.timeout,
+      );
       const completion = await this._model.createChatCompletion(
         {
           ...finalConfig,
@@ -137,18 +153,37 @@ export class OpenAI implements Model {
           stream: finalConfig.stream,
         },
         {
-          timeout,
-          responseType: finalConfig.stream ? 'stream' : 'json',
-          params: this._isAzure ? AzureQueryParams : undefined,
+          signal: controller.signal,
           headers: this._headers,
         },
       );
+      clearTimeout(timeoutId);
 
-      // @ts-ignore
-      const response: CreateChatCompletionResponse = completion.data;
+      if (!completion.ok) {
+        if (completion.status === 401) {
+          debug.error(
+            'Authorization error, did you set the OpenAI API key correctly?',
+          );
+          throw new Error('Authorization error');
+        } else if (completion.status === 429 || completion.status >= 500) {
+          debug.log(
+            `Completion rate limited (${completion.status}), retrying... attempts left: ${finalRequestOptions.retries}`,
+          );
+          await sleep(finalRequestOptions.retryInterval);
+          return this.request(messages, config, {
+            ...finalRequestOptions,
+            retries: finalRequestOptions.retries - 1,
+            // double the interval everytime we retry
+            retryInterval: finalRequestOptions.retryInterval * 2,
+          });
+        }
+      }
 
       let content: string | undefined;
       if (finalConfig.stream) {
+        // @ts-ignore
+        const response = completion.body as CreateChatCompletionResponse;
+
         debug.write('[STREAM] response received:\n');
         content = await new Promise<string>((resolve, reject) => {
           let res = '';
@@ -166,7 +201,7 @@ export class OpenAI implements Model {
                 const text = parsed.choices[0].delta.content ?? '';
 
                 debug.write(text);
-                events?.emit('data', text);
+                finalRequestOptions?.events?.emit('data', text);
                 res += text;
               } catch (e) {
                 debug.error(
@@ -184,17 +219,16 @@ export class OpenAI implements Model {
         });
         debug.write('\n[STREAM] response end\n');
       } else {
-        content = completion.data.choices[0].message?.content;
+        content = (await completion.json()).choices[0].message?.content;
       }
 
-      const usage = completion.data.usage;
       if (!content) {
         throw new Error('Completion response malformed');
       }
 
+      const usage = !finalConfig.stream && (await completion.json()).usage;
       return {
         content,
-        model: completion.data.model,
         isStream: Boolean(finalConfig.stream),
         usage: usage
           ? {
@@ -204,13 +238,9 @@ export class OpenAI implements Model {
             }
           : undefined,
       };
-    } catch (error: unknown) {
-      if (!isAxiosError(error)) {
-        throw error;
-      }
-
+    } catch (error: any) {
       // no more retries left
-      if (!retries) {
+      if (!finalRequestOptions.retries) {
         debug.log('Completion failed, already retryed, failing completion');
         throw error;
       }
@@ -218,28 +248,18 @@ export class OpenAI implements Model {
       if (
         error.code === 'ETIMEDOUT' ||
         error.code === 'ECONNABORTED' ||
-        error.code === 'ECONNRESET' ||
-        (error.response &&
-          (error.response.status === 429 || error.response.status >= 500))
+        error.code === 'ECONNRESET'
       ) {
         debug.log(
-          `Completion rate limited (${error.code}, ${error.response?.status}), retrying... attempts left: ${retries}`,
+          `Completion timed out (${error.code}), retrying... attempts left: ${finalRequestOptions.retries}`,
         );
-        await sleep(retryInterval);
+        await sleep(finalRequestOptions.retryInterval);
         return this.request(messages, config, {
-          retries: retries - 1,
+          ...finalRequestOptions,
+          retries: finalRequestOptions.retries - 1,
           // double the interval everytime we retry
-          retryInterval: retryInterval * 2,
-          timeout,
-          minimumResponseTokens,
-          events,
+          retryInterval: finalRequestOptions.retryInterval * 2,
         });
-      }
-
-      if (error?.response?.status === 401) {
-        debug.error(
-          'Authorization error, did you set the OpenAI API key correctly?',
-        );
       }
 
       throw error;

@@ -1,5 +1,5 @@
 import EventEmitter from 'events';
-import { ConfigurationParameters } from 'openai';
+import { ConfigurationParameters } from 'openai-edge';
 import { z } from 'zod';
 
 import { MaybePromise } from './utils';
@@ -54,7 +54,6 @@ export type ChatRequestOptions = {
 
 export interface ChatResponse<T = string> {
   content: T;
-  model: string;
 
   // set to true if this content was streamed. note to actually access the stream, you have to pass in an event emitter via ChatRequestOptions
   isStream: boolean;
