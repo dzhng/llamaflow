@@ -209,14 +209,14 @@ const models = [
 
   for (let itr = 0; itr < 1; itr++) {
     for (const model of models) {
-      const streamFalseStart = Date.now();
-      await benchmark({ stream: false, model });
-      const streamFalseTime = Date.now() - streamFalseStart;
+      const streamStart = Date.now();
+      await benchmark({ stream: true, model });
+      const streamTime = Date.now() - streamStart;
 
       results.push({
         model,
         iteration: itr,
-        time: streamFalseTime,
+        time: streamTime,
       });
     }
   }

@@ -6,7 +6,6 @@ import {
   CreateChatCompletionRequest,
   OpenAIApi,
 } from 'openai-edge';
-import { Readable } from 'stream';
 
 import { Chat } from '../chat';
 import {
@@ -28,8 +27,6 @@ import { debug, sleep } from '../utils';
 
 import { TokenError } from './errors';
 import type { Model } from './interface';
-
-interface CreateChatCompletionResponse extends Readable {}
 
 const Defaults: CreateChatCompletionRequest = {
   model: 'gpt-3.5-turbo',
@@ -108,6 +105,7 @@ export class OpenAI implements Model {
     return numTokens;
   }
 
+  // eslint-disable-next-line complexity
   async request(
     messages: Message[],
     config = {} as Partial<ModelConfig>,
@@ -179,45 +177,41 @@ export class OpenAI implements Model {
         }
       }
 
-      let content: string | undefined;
+      let content = '';
       let usage: any;
       if (finalConfig.stream) {
-        // @ts-ignore
-        const response = completion.body as CreateChatCompletionResponse;
+        const reader = completion.body?.getReader();
+        if (!reader) {
+          throw new Error('Reader undefined');
+        }
 
-        debug.write('[STREAM] response received:\n');
-        content = await new Promise<string>((resolve, reject) => {
-          let res = '';
-          response.on('data', (message: Buffer) => {
-            const stringfied = message.toString('utf8').split('\n');
+        const decoder = new TextDecoder('utf-8');
+        while (true) {
+          const { done, value } = await reader.read();
+          const stringfied = decoder.decode(value).split('\n');
 
-            for (const line of stringfied) {
-              try {
-                const cleaned = line.replace('data:', '').trim();
-                if (cleaned.length === 0 || cleaned === '[DONE]') {
-                  continue;
-                }
-
-                const parsed = jsonic(cleaned);
-                const text = parsed.choices[0].delta.content ?? '';
-
-                debug.write(text);
-                finalRequestOptions?.events?.emit('data', text);
-                res += text;
-              } catch (e) {
-                debug.error(
-                  'Error parsing content:',
-                  message.toString('utf8'),
-                  e,
-                );
+          for (const line of stringfied) {
+            try {
+              const cleaned = line.replace('data:', '').trim();
+              if (cleaned.length === 0 || cleaned === '[DONE]') {
+                continue;
               }
+
+              const parsed = jsonic(cleaned);
+              const text = parsed.choices[0].delta.content ?? '';
+
+              debug.write(text);
+              finalRequestOptions?.events?.emit('data', text);
+              content += text;
+            } catch (e) {
+              debug.error('Error parsing content', e);
             }
-          });
-          response.on('close', () => {
-            resolve(res);
-          });
-          response.on('error', () => reject(new Error('Error reading stream')));
-        });
+          }
+
+          if (done) {
+            break;
+          }
+        }
         debug.write('\n[STREAM] response end\n');
       } else {
         const body = await completion.json();
