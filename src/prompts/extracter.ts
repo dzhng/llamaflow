@@ -11,6 +11,6 @@ export const extractJSONArrayResponse = (res: string): string | undefined =>
 export const extractBulletPointsResponse = (res: string): string[] => {
   return res
     .split('\n')
-    .map(s => s.trim().replace('- ', ''))
-    .filter(s => s.length > 0);
+    .map((s) => s.trim().replace('- ', ''))
+    .filter((s) => s.length > 0);
 };

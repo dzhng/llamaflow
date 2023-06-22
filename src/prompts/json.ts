@@ -19,8 +19,9 @@ export default function buildRawPrompt<T extends z.ZodType>(
       const isArray = prompt.schema instanceof ZodArray;
       try {
         let json: any;
+        let extracted: string | undefined;
         if (!prompt.parseResponse) {
-          const extracted = isArray
+          extracted = isArray
             ? extractJSONArrayResponse(response.content)
             : extractJSONObjectResponse(response.content);
           if (!extracted) {
@@ -43,7 +44,7 @@ export default function buildRawPrompt<T extends z.ZodType>(
         if (parsed.success) {
           return { success: true, data: parsed.data };
         } else {
-          debug.error('Error parsing json:', parsed.error);
+          debug.error('Error parsing json:', parsed.error, extracted, json);
           const issuesMessage = parsed.error.issues.reduce(
             (prev, issue) =>
               issue.path && issue.path.length > 0
