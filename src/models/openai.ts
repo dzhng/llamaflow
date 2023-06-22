@@ -71,20 +71,35 @@ export class OpenAI implements Model {
     chatConfig?: ChatConfig,
   ) {
     this._isAzure = Boolean(config.azureEndpoint && config.azureDeployment);
+
     const configuration = new Configuration({
       ...config,
       basePath: this._isAzure
         ? `${config.azureEndpoint}${
             config.azureEndpoint?.at(-1) === '/' ? '' : '/'
-          }openai/deployments/${config.azureDeployment}?${new URLSearchParams(
-            AzureQueryParams,
-          )}`
+          }openai/deployments/${config.azureDeployment}`
         : undefined,
     });
+
     this._headers = this._isAzure
       ? { 'api-key': String(config.apiKey) }
       : undefined;
-    this._model = new OpenAIApi(configuration);
+
+    const azureFetch: typeof globalThis.fetch = (input, init) => {
+      const customInput =
+        typeof input === 'string'
+          ? `${input}?${new URLSearchParams(AzureQueryParams)}`
+          : input instanceof URL
+          ? `${input.toString()}?${new URLSearchParams(AzureQueryParams)}`
+          : input;
+      return fetch(customInput, init);
+    };
+
+    this._model = new OpenAIApi(
+      configuration,
+      undefined,
+      this._isAzure ? azureFetch : undefined,
+    );
 
     this.defaults = defaults ?? {};
     this.config = chatConfig ?? {};
@@ -215,6 +230,12 @@ export class OpenAI implements Model {
         debug.write('\n[STREAM] response end\n');
       } else {
         const body = await completion.json();
+        if (body.error || !('choices' in body)) {
+          throw new Error(
+            `Completion response error: ${JSON.stringify(body ?? {})}`,
+          );
+        }
+
         content = body.choices[0].message?.content;
         usage = body.usage;
       }
