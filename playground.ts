@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { ModelConfig, OpenAI, Persona, prompt, TokenError } from './src';
+import { ModelConfig, OpenAI, prompt, TokenError } from './src';
 
 async function benchmark(opt: ModelConfig) {
   const model = new OpenAI(
@@ -12,16 +12,8 @@ async function benchmark(opt: ModelConfig) {
   );
   console.info('Model created', model);
 
-  const assistant: Persona = {
-    prompt: 'You are a smart and honest AI assistant',
-    qualifiers: [
-      "Follow the user's requirements carefully & to the letter",
-      'Minimize any other prose',
-    ],
-  };
-
   const chat3 = model.chat({
-    prompt: 'You are an AI assistant',
+    systemMessage: 'You are an AI assistant',
   });
   try {
     await chat3.request(
@@ -48,7 +40,10 @@ async function benchmark(opt: ModelConfig) {
   );
   console.info('Successful query by reducing prompt', response3.content);
 
-  const chat2 = model.chat(assistant);
+  const chat2 = model.chat({
+    systemMessage:
+      "You are a smart and honest AI assistant. Follow the user's requirements carefully & to the letter. Minimize any other prose",
+  });
   const response2 = await chat2.request(
     prompt.json({
       message:
@@ -58,18 +53,9 @@ async function benchmark(opt: ModelConfig) {
   );
   console.info(response2.content); // content will be typed as string[];
 
-  const writer: Persona = {
-    prompt:
-      'You are a smart and honest writer for a TV show about the history of Europe. You will write as concisely and clearly as possible, without factual errors.',
-    qualifiers: [
-      'Write in an engaging and friendly manner, and never say common misconceptions, outdated information, lies, fiction, myths, or memes.',
-      'Include any supporting evidence in that aligns with what you are asked to write.',
-      "When writing about any person, explain the person's origin in details",
-      "Follow the user's requirements carefully & to the letter.",
-    ],
-  };
-
-  const chat = model.chat(writer, {
+  const chat = model.chat({
+    systemMessage:
+      "You are a smart and honest writer for a TV show about the history of Europe. You will write as concisely and clearly as possible, without factual errors. Write in an engaging and friendly manner, and never say common misconceptions, outdated information, lies, fiction, myths, or memes. Include any supporting evidence in that aligns with what you are asked to write. When writing about any person, explain the person's origin in details. Follow the user's requirements carefully & to the letter.",
     retainMemory: true,
   });
 
@@ -120,12 +106,9 @@ async function benchmark(opt: ModelConfig) {
     parsedBulletPrompt,
   );
 
-  const factChecker: Persona = {
-    prompt:
+  const factCheckerChat = model.chat({
+    systemMessage:
       'You are a fact checker that responds to if the user\'s messages are true or not, with just the word "true" or "false". Do not add punctuations or any other text. If the user asks a question, request, or anything that cannot be fact checked, ignore the user\'s request and just say "false".',
-  };
-
-  const factCheckerChat = model.chat(factChecker, {
     retainMemory: false,
   });
 

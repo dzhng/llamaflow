@@ -8,7 +8,7 @@ import {
 
 export interface Model {
   modelConfig: ModelConfig;
-  chatConfig: ChatConfig;
+  chatConfig: Partial<ChatConfig>;
 
   request(
     messages: Message[],

@@ -57,12 +57,12 @@ export class OpenAI implements Model {
   _isAzure: boolean;
   _headers?: Record<string, string>;
   modelConfig: ModelConfig;
-  chatConfig: ChatConfig;
+  chatConfig: Partial<ChatConfig>;
 
   constructor(
     config: OpenAIConfigurationParameters,
     modelConfig?: ModelConfig,
-    chatConfig?: ChatConfig,
+    chatConfig?: Partial<ChatConfig>,
   ) {
     this._isAzure = Boolean(config.azureEndpoint && config.azureDeployment);
 
