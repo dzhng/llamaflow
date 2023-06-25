@@ -5,7 +5,7 @@ import { ModelConfig, OpenAI, prompt, TokenError } from './src';
 async function benchmark(opt: ModelConfig) {
   const model = new OpenAI(
     { apiKey: process.env.OPENAI_KEY ?? 'YOUR_OPENAI_KEY' },
-    opt,
+    { contextSize: 4096, ...opt },
     {
       options: { retries: 2, timeout: 10 * 60_000 },
     },

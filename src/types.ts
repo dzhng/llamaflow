@@ -25,7 +25,7 @@ export interface ModelConfig {
 }
 
 export interface ChatConfig {
-  // message injected at the start of every chat
+  // the message injected at the start of every chat to steer the agent
   systemMessage: string;
 
   // if chat memory should be retained after every request. when enabled, the chat's behavior will be similar to a normal user chat room, and model can have access to history when making inferences. defaults to false

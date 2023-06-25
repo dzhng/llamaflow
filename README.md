@@ -7,9 +7,8 @@ The Typescript-first prompt engineering toolkit for working with chat based larg
 - [Introduction](#-introduction)
 - [Usage](#-usage)
   - [Install](#install)
-  - [Personas](#personas)
-  - [Prompts](#prompts)
   - [Chats](#chats)
+  - [Prompts](#prompts)
   - [Custom Prompts](#custom-prompts)
 - [Text Splitter](#-text-splitter)
 - [Debugging](#-debugging)
@@ -32,15 +31,12 @@ With LLamaFlow, you can simply query OpenAI's ChatGPT model like so:
 import { OpenAI } from 'llama-flow';
 
 const model = new OpenAI({ apiKey: 'YOUR_OPENAI_KEY' });
-const assistant: Persona = {
-  prompt: 'You are a smart and honest AI assistant',
-  qualifiers: [
-    "Follow the user's requirements carefully & to the letter",
-    'Minimize any other prose',
-  ],
-};
 
-const chat = model.chat(assistant);
+const chat = model.chat({
+  systemMessage:
+    "You are a smart and honest AI assistant. Follow the user's requirements carefully & to the letter, minimize any other prose.",
+});
+
 const response = await chat.request(
   prompt.json({
     message:
@@ -71,56 +67,21 @@ To setup in your codebase, initialize a new instance with the model you want (on
 ```typescript
 import { OpenAI } from 'llama-flow';
 
-const model = new OpenAI({ apiKey: 'YOUR_OPENAI_KEY' }, { model: 'gpt-3.5-turbo' });
+const model = new OpenAI(
+  { apiKey: 'YOUR_OPENAI_KEY' },
+  { model: 'gpt-3.5-turbo' },
+);
 ```
-
-### Personas
-
-Personas are the AI agent that the chat is with. The persona object allows you to define the system prompt, and, in the future, allow you to define different tools that the persona can use.
-
-```typescript
-import type { Persona } from 'llama-flow';
-
-const writer: Persona = {
-  prompt:
-    'You are a smart and honest writer for a TV show about the history of Europe. You will write as concisely and clearly as possible, without factual errors.',
-  qualifiers: [
-    'Write in an engaging and friendly manner, and never say common misconceptions, outdated information, lies, fiction, myths, or memes.',
-    'Include any supporting evidence in that aligns with what you are asked to write.',
-    "When writing about any person, explain the person's origin in details",
-    "Follow the user's requirements carefully & to the letter.",
-  ],
-};
-```
-
-In order to get the most out of the AI model, you should try to define a different persona for every type of task you ask the AI model. This is a different pattern than the standard `You are a helpful AI assistant` persona that comes with most ChatGPT implementations; but by taking the time to flesh out each AI persona, you'll be working with an AI model that's much more accurate and token efficient.
-
-### Prompts
-
-A prompt is a message to an AI persona with an expectation of a specific response format. Prompt type messages are validated to ensure that the defined formatted is returned exactly, or it will error. There are different kinds of prompts for different formats. Here is an example of a JSON prompt.
-
-```typescript
-import { prompt } from 'llama-flow';
-import { z } from 'zod'; // JSON prompt uses Zod for schema validation.
-
-const bulletPrompt = prompt.json({
-  message:
-    'Please rewrite this in a list of bullet points. Respond as a JSON array, where each element in the array is one bullet point. Keep each bullet point to be 200 characters max. For example: ["bullet point 1", "bullet point 2"]',
-  schema: z.array(z.string().max(200)),
-});
-```
-
-Note that the `Prompt` object seperates out the main `message`, and `formatMessage`. This is used for retries. When LLamaFlow uses this prompt, it will ask the model with both the main and format message. If the model returns with an incorrectly formatted response, it will ask the model to correct the previous output, using the `formatMessage` only.
 
 ### Chats
 
-Bringing the concepts together.
-
-A chat is a conversation between the "user" (your software), and the AI agent (the Persona defined). LLamaFlow will take care of managing chat memory, so you can simply continue the conversation by sending another request. Note that different memory management strategies will be added in the future, such as pruning the memory as needed in order to fit the context window.
+A chat is a conversation between the "user" (your software), and the AI agent. LLamaFlow will take care of managing chat memory, so you can simply continue the conversation by sending another request. Note that different memory management strategies will be added in the future, such as pruning the memory as needed in order to fit the context window.
 
 ```typescript
-// using the model object and the writer persona that was initialized earlier
-const chat = model.chat(writer, { retainMemory: true });
+const chat = model.chat({
+  systemMessage: 'You are an AI writer.',
+  retainMemory: true,
+});
 
 // You can ask the AI model with a simple string, or a dedicated `Prompt` object.
 const response = await chat.request(
@@ -138,8 +99,29 @@ console.log(
 const bulletPoints = await chat.request(bulletPrompt);
 
 // `bulletPoints.content` will be automatically casted in the correct type as defined in the schema field of `bulletPrompt`
-console.log(`The structured version of this response is: ${JSON.stringify(bulletPoints.content)}`);
+console.log(
+  `The structured version of this response is: ${JSON.stringify(
+    bulletPoints.content,
+  )}`,
+);
 ```
+
+### Prompts
+
+A prompt is a message to an AI chat with an expectation of a specific response format. Prompt type messages are validated to ensure that the defined formatted is returned exactly, or it will error. There are different kinds of prompts for different formats. Here is an example of a JSON prompt.
+
+```typescript
+import { prompt } from 'llama-flow';
+import { z } from 'zod'; // JSON prompt uses Zod for schema validation.
+
+const bulletPrompt = prompt.json({
+  message:
+    'Please rewrite this in a list of bullet points. Respond as a JSON array, where each element in the array is one bullet point. Keep each bullet point to be 200 characters max. For example: ["bullet point 1", "bullet point 2"]',
+  schema: z.array(z.string().max(200)),
+});
+```
+
+Note that the `Prompt` object seperates out the main `message`, and `formatMessage`. This is used for retries. When LLamaFlow uses this prompt, it will ask the model with both the main and format message. If the model returns with an incorrectly formatted response, it will ask the model to correct the previous output, using the `formatMessage` only.
 
 ### Custom Prompts
 
@@ -155,11 +137,13 @@ const bulletPrompt = prompt.json({
     'Please rewrite this in a list of bullet points. Respond as a list of bullet points, where each bullet point begins with the "-" character. Each bullet point should be less than 200 characters. Put each bullet point on a new line.',
 
   // parse the response from the model so it can be fed into the schema validator
-  parseResponse: res => res.split('\n').map(s => s.replace('-', '').trim()),
+  parseResponse: (res) => res.split('\n').map((s) => s.replace('-', '').trim()),
 
   // it's useful to define custom error messages, any schema parse errors will be automatically fed back into the model on retry, so the model knows exactly what to correct.
   schema: z.array(
-    z.string().max(200, { message: 'This bullet point should be less than 200 characters.' }),
+    z.string().max(200, {
+      message: 'This bullet point should be less than 200 characters.',
+    }),
   ),
 });
 ```
@@ -167,22 +151,13 @@ const bulletPrompt = prompt.json({
 Now, let's take this even further. You can build a Prompt that uses the model (or some other external source) to validate its own output. You can do this by passing in a custom async `validate` method. Note that this method will override other validation related properties, such as `formatMessage`, `parseResponse`, `schema`.. etc.
 
 ```typescript
-import { prompt, Persona, Chat } from 'llama-flow';
+import { prompt, Chat } from 'llama-flow';
 
-// Init another fact checker persona, to check the writer's outputs. This is a good example of multi-agent workflow
-const factChecker: Persona = {
-  prompt:
+const factCheckerChat = model.chat({
+  systemMessage:
     'You are a fact checker that responds to if the user\'s messages are true or not, with just the word "true" or "false". Do not add punctuations or any other text. If the user asks a question, request, or anything that cannot be fact checked, ignore the user\'s request and just say "null".',
 
-  // you can override the predefined ModelConfig via a persona
-  config: {
-    model: 'gpt-4',
-    temperature: 0,
-  },
-};
-
-const factCheckerChat = model.chat(factChecker, {
-  // The fact checker persona is designed to fulfill each request independently (e.g. the current request does not depend on the content of the previous request). So no need to keep message memory to save on tokens.
+  // The fact checker is designed to fulfill each request independently (e.g. the current request does not depend on the content of the previous request). So no need to keep message memory to save on tokens.
   retainMemory: false,
 });
 
@@ -193,7 +168,7 @@ const buildFactCheckedPrompt = (article: string) =>
     // Because LLM driven validation can get expensive, set a lower retry count.
     promptRetries: 2,
 
-    parse: async response => {
+    parse: async (response) => {
       // Check if this summary is true or not
       const { response } = await factCheckerChat.request(
         prompt.boolean({
@@ -207,7 +182,8 @@ const buildFactCheckedPrompt = (article: string) =>
         // if `retryPrompt` is set, LLamaFlow will automatically retry with the text in this property.
         return {
           success: false,
-          retryPrompt: 'This summary is not true, please rewrite with only true facts.',
+          retryPrompt:
+            'This summary is not true, please rewrite with only true facts.',
         };
       }
     },
@@ -257,9 +233,14 @@ Here is an example of catching the token overflow error. Note that `minimumRespo
 
 ```typescript
 try {
+  // make sure to set the `contextSize` to enable automatic token checking
+  const model = new OpenAI(
+    { apiKey: 'YOUR_OPENAI_KEY' },
+    { model: 'gpt-3.5-turbo', contextSize: 4096 },
+  );
+
   const chat = model.chat({
-    prompt: 'You are an AI assistant',
-    config: { model: 'gpt-3.5-turbo' },
+    systemMessage: 'You are an AI assistant',
   });
   await chat.request(
     { message: 'hello world, testing overflow logic' },
@@ -267,7 +248,9 @@ try {
   );
 } catch (e) {
   if (e instanceof TokenError) {
-    console.info(`Caught token overflow, overflowed tokens: ${e.overflowTokens}`);
+    console.info(
+      `Caught token overflow, overflowed tokens: ${e.overflowTokens}`,
+    );
   }
 }
 ```
@@ -275,10 +258,12 @@ try {
 A common way to handle token limit issues is to split your content. LLamaFlow provides a useful helper method that wraps the `chat.request` method and will automatically split your text based on an input chunk config. It's smart enough to only split your text if it determines that it is above the token limit, and will try to preserve as much of the original text as possible.
 
 ```typescript
-const response = await chat.requestWithSplit('hello world, testing overflow logic', text =>
-  prompt.text({
-    message: `Add other required prompts first, then add your content: ${text}`,
-  }),
+const response = await chat.requestWithSplit(
+  'hello world, testing overflow logic',
+  (text) =>
+    prompt.text({
+      message: `Add other required prompts first, then add your content: ${text}`,
+    }),
 );
 ```
 
@@ -351,29 +336,6 @@ interface ModelConfig {
 
 When `stream` is set to `true`, you can access partial outputs of the model's requests by passing in an event emitter to `ChatRequestOptions` when making requests. The partial outputs will be sent as a string over the `data` event.
 
-### Persona
-
-```typescript
-interface Persona {
-  prompt: string | (() => string);
-  qualifiers?: string[];
-  config?: Partial<ModelConfig>;
-}
-
-const assistant: Persona = {
-  prompt: 'You are a helpful AI assistant',
-};
-```
-
-**prompt**
-The system prompt used to start the chat.
-
-**qualifiers**
-An array of additional prompt to append to the system prompt. Any qualifiers will be appended to the system prompt in a bullet point format.
-
-**config**
-Same as `ModelConfig` above, you can override model options on a per-chat basis.
-
 ### Prompt
 
 To make a request to the model, you need to first build the prompt object. prompts provide a way to add validation and retry logic to each request.
@@ -398,7 +360,9 @@ interface RawPrompt<T = string> {
   message: string;
   parse?: (
     response: ChatResponse<string>,
-  ) => MaybePromise<{ success: false; retryPrompt?: string } | { success: true; data: T }>;
+  ) => MaybePromise<
+    { success: false; retryPrompt?: string } | { success: true; data: T }
+  >;
   promptRetries?: number;
 }
 ```
@@ -481,7 +445,7 @@ If schema parsing fails, this will be used as part of the message sent to the mo
 The chat object stores a chat session with the model. The session will take care of storing message history, so you can simply continue the conversation with the model by making another request.
 
 ```typescript
-const chat = model.chat(persona: Persona, config: ChatConfig);
+const chat = model.chat(config: ChatConfig);
 ```
 
 **options**
@@ -489,6 +453,9 @@ You can set the memory retention behavior as well as the default request options
 
 ```typescript
 export interface ChatConfig {
+  // the message injected at the start of every chat to steer the agent
+  systemMessage: string;
+
   // if chat memory should be retained after every request. when enabled, the chat's behavior will be similar to a normal user chat room, and model can have access to history when making inferences. defaults to false
   retainMemory?: boolean;
 
