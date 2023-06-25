@@ -16,6 +16,7 @@ import {
 } from '../config';
 import type {
   ChatConfig,
+  ChatFunctionResponse,
   ChatRequestOptions,
   ChatResponse,
   Message,
@@ -117,10 +118,10 @@ export class OpenAI implements Model {
   }
 
   // eslint-disable-next-line complexity
-  async request(
+  async request<T>(
     messages: Message[],
     requestOptions = {} as Partial<ChatRequestOptions>,
-  ): Promise<ChatResponse<string>> {
+  ): Promise<ChatResponse<string> | ChatFunctionResponse<T>> {
     const finalRequestOptions = defaults(requestOptions, RequestDefaults);
     debug.log(
       `Sending request with config: ${JSON.stringify(
@@ -151,6 +152,7 @@ export class OpenAI implements Model {
           model: 'gpt-3.5-turbo',
           ...convertConfig(this.modelConfig),
           messages,
+          functions: this.chatConfig.functions,
         },
         {
           signal: controller.signal,
@@ -179,7 +181,8 @@ export class OpenAI implements Model {
         }
       }
 
-      let content = '';
+      let content: string | undefined;
+      let functionCall: { name: string; arguments: T } | undefined;
       let usage: any;
       if (this.modelConfig.stream) {
         const reader = completion.body?.getReader();
@@ -224,24 +227,38 @@ export class OpenAI implements Model {
         }
 
         content = body.choices[0].message?.content;
+        functionCall = body.choices[0].message?.function_call;
         usage = body.usage;
       }
 
-      if (!content) {
+      if (content) {
+        return {
+          content,
+          isStream: Boolean(this.modelConfig.stream),
+          usage: usage
+            ? {
+                totalTokens: usage.total_tokens,
+                promptTokens: usage.prompt_tokens,
+                completionTokens: usage.completion_tokens,
+              }
+            : undefined,
+        };
+      } else if (functionCall) {
+        return {
+          name: functionCall.name,
+          arguments: functionCall.arguments,
+          isStream: Boolean(this.modelConfig.stream),
+          usage: usage
+            ? {
+                totalTokens: usage.total_tokens,
+                promptTokens: usage.prompt_tokens,
+                completionTokens: usage.completion_tokens,
+              }
+            : undefined,
+        };
+      } else {
         throw new Error('Completion response malformed');
       }
-
-      return {
-        content,
-        isStream: Boolean(this.modelConfig.stream),
-        usage: usage
-          ? {
-              totalTokens: usage.total_tokens,
-              promptTokens: usage.prompt_tokens,
-              completionTokens: usage.completion_tokens,
-            }
-          : undefined,
-      };
     } catch (error: any) {
       // no more retries left
       if (!finalRequestOptions.retries) {

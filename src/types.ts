@@ -1,5 +1,8 @@
 import EventEmitter from 'events';
-import { ConfigurationParameters } from 'openai-edge';
+import {
+  ConfigurationParameters,
+  ChatCompletionFunctions as _ChatCompletionFunctions,
+} from 'openai-edge';
 import { z } from 'zod';
 
 import { MaybePromise } from './utils';
@@ -24,9 +27,14 @@ export interface ModelConfig {
   stream?: boolean;
 }
 
+export type ChatCompletionFunctions = _ChatCompletionFunctions;
+
 export interface ChatConfig {
   // the message injected at the start of every chat to steer the agent
   systemMessage: string;
+
+  // inject array of functions into the system message for the llm to call later (NOTE: only supported in specific OAI models)
+  functions?: ChatCompletionFunctions[];
 
   // if chat memory should be retained after every request. when enabled, the chat's behavior will be similar to a normal user chat room, and model can have access to history when making inferences. defaults to false
   retainMemory?: boolean;
@@ -53,6 +61,20 @@ export type ChatRequestOptions = {
 
 export interface ChatResponse<T = string> {
   content: T;
+
+  // set to true if this content was streamed. note to actually access the stream, you have to pass in an event emitter via ChatRequestOptions
+  isStream: boolean;
+
+  usage?: {
+    promptTokens: number;
+    completionTokens: number;
+    totalTokens: number;
+  };
+}
+
+export interface ChatFunctionResponse<T = any> {
+  name: string;
+  arguments: T;
 
   // set to true if this content was streamed. note to actually access the stream, you have to pass in an event emitter via ChatRequestOptions
   isStream: boolean;

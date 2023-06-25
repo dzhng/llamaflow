@@ -1,5 +1,6 @@
 import {
   ChatConfig,
+  ChatFunctionResponse,
   ChatRequestOptions,
   ChatResponse,
   Message,
@@ -10,10 +11,10 @@ export interface Model {
   modelConfig: ModelConfig;
   chatConfig: Partial<ChatConfig>;
 
-  request(
+  request<T>(
     messages: Message[],
     opt?: ChatRequestOptions,
-  ): Promise<ChatResponse<string>>;
+  ): Promise<ChatResponse<string> | ChatFunctionResponse<T>>;
 
   getTokensFromMessages(messages: Message[]): number;
 }
