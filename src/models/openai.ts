@@ -21,17 +21,12 @@ import type {
   Message,
   ModelConfig,
   OpenAIConfigurationParameters,
-  Persona,
 } from '../types';
 import { debug, sleep } from '../utils';
 
 import { TokenError } from './errors';
 import type { Model } from './interface';
 
-const Defaults: CreateChatCompletionRequest = {
-  model: 'gpt-3.5-turbo',
-  messages: [],
-};
 const RequestDefaults = {
   retries: CompletionDefaultRetries,
   retryInterval: RateLimitRetryIntervalMs,
@@ -40,7 +35,6 @@ const RequestDefaults = {
 };
 const AzureQueryParams = { 'api-version': '2023-03-15-preview' };
 
-const getTokenLimit = (model: string) => (model === 'gpt-4' ? 8000 : 4096);
 const encoder = tiktoken.getEncoding('cl100k_base');
 
 const convertConfig = (
@@ -62,12 +56,12 @@ export class OpenAI implements Model {
   _model: OpenAIApi;
   _isAzure: boolean;
   _headers?: Record<string, string>;
-  defaults: ModelConfig;
-  config: ChatConfig;
+  modelConfig: ModelConfig;
+  chatConfig: ChatConfig;
 
   constructor(
     config: OpenAIConfigurationParameters,
-    defaults?: ModelConfig,
+    modelConfig?: ModelConfig,
     chatConfig?: ChatConfig,
   ) {
     this._isAzure = Boolean(config.azureEndpoint && config.azureDeployment);
@@ -101,13 +95,15 @@ export class OpenAI implements Model {
       this._isAzure ? azureFetch : undefined,
     );
 
-    this.defaults = defaults ?? {};
-    this.config = chatConfig ?? {};
+    this.modelConfig = modelConfig ?? {};
+    this.chatConfig = chatConfig ?? {
+      systemMessage: 'You are a helpful AI assistant',
+    };
   }
 
-  chat(persona: Persona, config?: ChatConfig) {
-    const finalConfig = defaults(config, this.config);
-    return new Chat(persona, finalConfig ?? {}, this);
+  chat(config?: ChatConfig) {
+    const finalConfig = defaults(config, this.chatConfig);
+    return new Chat(finalConfig ?? {}, this);
   }
 
   getTokensFromMessages(messages: Message[]) {
@@ -123,29 +119,20 @@ export class OpenAI implements Model {
   // eslint-disable-next-line complexity
   async request(
     messages: Message[],
-    config = {} as Partial<ModelConfig>,
     requestOptions = {} as Partial<ChatRequestOptions>,
   ): Promise<ChatResponse<string>> {
-    const finalConfig = defaults(
-      convertConfig(config),
-      convertConfig(this.defaults),
-      Defaults,
-    );
-    const finalRequestOptions = defaults(
-      requestOptions,
-      this.config.options,
-      RequestDefaults,
-    );
+    const finalRequestOptions = defaults(requestOptions, RequestDefaults);
     debug.log(
       `Sending request with config: ${JSON.stringify(
-        finalConfig,
+        this.modelConfig,
       )}, options: ${JSON.stringify(finalRequestOptions)}`,
     );
     try {
       // check if we'll have enough tokens to meet the minimum response
-      const maxPromptTokens =
-        getTokenLimit(finalConfig.model) -
-        finalRequestOptions.minimumResponseTokens;
+      const maxPromptTokens = this.modelConfig.contextSize
+        ? this.modelConfig.contextSize -
+          finalRequestOptions.minimumResponseTokens
+        : 100_000;
       const messageTokens = this.getTokensFromMessages(messages);
       if (messageTokens > maxPromptTokens) {
         throw new TokenError(
@@ -161,9 +148,9 @@ export class OpenAI implements Model {
       );
       const completion = await this._model.createChatCompletion(
         {
-          ...finalConfig,
+          model: 'gpt-3.5-turbo',
+          ...convertConfig(this.modelConfig),
           messages,
-          stream: finalConfig.stream,
         },
         {
           signal: controller.signal,
@@ -183,7 +170,7 @@ export class OpenAI implements Model {
             `Completion rate limited (${completion.status}), retrying... attempts left: ${finalRequestOptions.retries}`,
           );
           await sleep(finalRequestOptions.retryInterval);
-          return this.request(messages, config, {
+          return this.request(messages, {
             ...finalRequestOptions,
             retries: finalRequestOptions.retries - 1,
             // double the interval everytime we retry
@@ -194,7 +181,7 @@ export class OpenAI implements Model {
 
       let content = '';
       let usage: any;
-      if (finalConfig.stream) {
+      if (this.modelConfig.stream) {
         const reader = completion.body?.getReader();
         if (!reader) {
           throw new Error('Reader undefined');
@@ -246,7 +233,7 @@ export class OpenAI implements Model {
 
       return {
         content,
-        isStream: Boolean(finalConfig.stream),
+        isStream: Boolean(this.modelConfig.stream),
         usage: usage
           ? {
               totalTokens: usage.total_tokens,
@@ -271,7 +258,7 @@ export class OpenAI implements Model {
           `Completion timed out (${error.code}), retrying... attempts left: ${finalRequestOptions.retries}`,
         );
         await sleep(finalRequestOptions.retryInterval);
-        return this.request(messages, config, {
+        return this.request(messages, {
           ...finalRequestOptions,
           retries: finalRequestOptions.retries - 1,
           // double the interval everytime we retry

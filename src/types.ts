@@ -11,6 +11,8 @@ export type OpenAIConfigurationParameters = ConfigurationParameters & {
 
 export interface ModelConfig {
   model?: string;
+  contextSize?: number;
+  // max tokens to generate
   maxTokens?: number;
   temperature?: number;
   topP?: number;
@@ -23,17 +25,14 @@ export interface ModelConfig {
 }
 
 export interface ChatConfig {
+  // message injected at the start of every chat
+  systemMessage: string;
+
   // if chat memory should be retained after every request. when enabled, the chat's behavior will be similar to a normal user chat room, and model can have access to history when making inferences. defaults to false
   retainMemory?: boolean;
 
   // set default request options. note that this can be overridden on a per-request basis
   options?: ChatRequestOptions;
-}
-
-export interface Persona {
-  prompt: string | (() => string);
-  qualifiers?: string[];
-  config?: Partial<ModelConfig>;
 }
 
 export type ChatRequestOptions = {

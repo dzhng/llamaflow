@@ -3,14 +3,12 @@ import { defaults } from 'lodash';
 import { PromptDefaultRetries } from './config';
 import { TokenError } from './models/errors';
 import { Model } from './models/interface';
-import { buildMessage } from './persona';
 import { RecursiveCharacterTextSplitter } from './text-splitter';
 import type {
   ChatConfig,
   ChatRequestOptions,
   ChatResponse,
   Message,
-  Persona,
   RawPrompt,
 } from './types';
 import { debug } from './utils';
@@ -24,13 +22,11 @@ export type SplitRequestFn<T> = (
 ) => RawPrompt<T>;
 
 export class Chat {
-  persona: Persona;
   config: ChatConfig;
   model: Model;
   messages: Message[];
 
-  constructor(persona: Persona, config: ChatConfig, model: Model) {
-    this.persona = persona;
+  constructor(config: ChatConfig, model: Model) {
     this.config = config;
     this.model = model;
     this.messages = [];
@@ -52,11 +48,7 @@ export class Chat {
     ];
 
     const mergedOpt = defaults(opt, this.config.options);
-    const response = await this.model.request(
-      newMessages,
-      this.persona.config,
-      mergedOpt,
-    );
+    const response = await this.model.request(newMessages, mergedOpt);
     if (!response) {
       throw new Error('Chat request failed');
     }
@@ -161,7 +153,7 @@ export class Chat {
     this.messages = [
       {
         role: 'system',
-        content: buildMessage(this.persona),
+        content: this.config.systemMessage,
       },
     ];
   }

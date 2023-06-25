@@ -7,12 +7,11 @@ import {
 } from '../types';
 
 export interface Model {
-  defaults: ModelConfig;
-  config: ChatConfig;
+  modelConfig: ModelConfig;
+  chatConfig: ChatConfig;
 
   request(
     messages: Message[],
-    config?: Partial<ModelConfig>,
     opt?: ChatRequestOptions,
   ): Promise<ChatResponse<string>>;
 
