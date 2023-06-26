@@ -47,7 +47,8 @@
     "jsonic": "^1.0.1",
     "lodash": "^4.17.21",
     "openai-edge": "^1.1.0",
-    "zod": "^3.21.4"
+    "zod": "^3.21.4",
+    "zod-to-json-schema": "^3.21.2"
   },
   "peerDependencies": {
     "zod": "^3.21.4"
