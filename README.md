@@ -1,3 +1,5 @@
+NOTE: this library is deprecated, it is now split into [zod-gpt](https://github.com/dzhng/zod-gpt) and [llm-api](https://github.com/dzhng/llm-api).
+
 # 🦙 LLamaFlow
 
 [![test](https://github.com/dzhng/llamaflow/actions/workflows/test.yml/badge.svg?branch=main&event=push)](https://github.com/dzhng/llamaflow/actions/workflows/test.yml)
